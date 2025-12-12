@@ -14,7 +14,68 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      gallery: {
+        Row: {
+          caption: string | null
+          id: string
+          owner_uid: string
+          src: string
+          uploaded_at: string
+        }
+        Insert: {
+          caption?: string | null
+          id?: string
+          owner_uid: string
+          src: string
+          uploaded_at?: string
+        }
+        Update: {
+          caption?: string | null
+          id?: string
+          owner_uid?: string
+          src?: string
+          uploaded_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gallery_owner_uid_fkey"
+            columns: ["owner_uid"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["uid"]
+          },
+        ]
+      }
+      members: {
+        Row: {
+          bio: string
+          created_at: string
+          memory: string
+          name: string
+          profile_image: string
+          role: string
+          uid: string
+        }
+        Insert: {
+          bio: string
+          created_at?: string
+          memory: string
+          name: string
+          profile_image: string
+          role: string
+          uid: string
+        }
+        Update: {
+          bio?: string
+          created_at?: string
+          memory?: string
+          name?: string
+          profile_image?: string
+          role?: string
+          uid?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

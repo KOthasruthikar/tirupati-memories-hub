@@ -9,6 +9,7 @@ import Home from "./pages/Home";
 import TripDetails from "./pages/TripDetails";
 import Gallery from "./pages/Gallery";
 import Members from "./pages/Members";
+import MemberDetail from "./pages/MemberDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,6 +28,7 @@ const App = () => (
               <Route path="/trip-details" element={<TripDetails />} />
               <Route path="/gallery" element={<Gallery />} />
               <Route path="/members" element={<Members />} />
+              <Route path="/members/:uid" element={<MemberDetail />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </main>
