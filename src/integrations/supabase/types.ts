@@ -46,12 +46,49 @@ export type Database = {
           },
         ]
       }
+      member_tags: {
+        Row: {
+          created_at: string
+          gallery_id: string
+          id: string
+          member_uid: string
+        }
+        Insert: {
+          created_at?: string
+          gallery_id: string
+          id?: string
+          member_uid: string
+        }
+        Update: {
+          created_at?: string
+          gallery_id?: string
+          id?: string
+          member_uid?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "member_tags_gallery_id_fkey"
+            columns: ["gallery_id"]
+            isOneToOne: false
+            referencedRelation: "gallery"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_tags_member_uid_fkey"
+            columns: ["member_uid"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["uid"]
+          },
+        ]
+      }
       members: {
         Row: {
           bio: string
           created_at: string
           memory: string
           name: string
+          password_hash: string | null
           profile_image: string
           role: string
           uid: string
@@ -61,6 +98,7 @@ export type Database = {
           created_at?: string
           memory: string
           name: string
+          password_hash?: string | null
           profile_image: string
           role: string
           uid: string
@@ -70,6 +108,7 @@ export type Database = {
           created_at?: string
           memory?: string
           name?: string
+          password_hash?: string | null
           profile_image?: string
           role?: string
           uid?: string
@@ -81,7 +120,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      member_login: {
+        Args: { p_password: string; p_uid: string }
+        Returns: Json
+      }
+      member_set_password: {
+        Args: { p_password: string; p_uid: string }
+        Returns: Json
+      }
     }
     Enums: {
       [_ in never]: never

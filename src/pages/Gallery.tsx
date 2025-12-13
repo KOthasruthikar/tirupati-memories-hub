@@ -24,6 +24,8 @@ const Gallery = () => {
   const lightboxImages = filteredImages.map((img) => ({
     url: img.src,
     caption: `${img.caption || "Photo"} - by ${img.members?.name || "Unknown"} (UID: ${img.owner_uid})`,
+    id: img.id,
+    ownerUid: img.owner_uid,
   }));
 
   const openLightbox = (index: number) => {

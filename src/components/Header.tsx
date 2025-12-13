@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X } from "lucide-react";
+import { Menu, X, User, LogIn } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { siteMeta } from "@/data/seed";
+import { useAuth } from "@/contexts/AuthContext";
 
 const navLinks = [
   { path: "/", label: "Home" },
@@ -14,6 +15,7 @@ const navLinks = [
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
+  const { member } = useAuth();
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
@@ -55,6 +57,33 @@ const Header = () => {
               </Link>
             );
           })}
+
+          {/* Auth Button */}
+          {member ? (
+            <Link
+              to="/profile"
+              className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                location.pathname === "/profile"
+                  ? "text-primary bg-primary/10"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
+              }`}
+            >
+              <User className="w-4 h-4" />
+              <span className="max-w-24 truncate">{member.name}</span>
+            </Link>
+          ) : (
+            <Link
+              to="/login"
+              className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                location.pathname === "/login"
+                  ? "text-primary bg-primary/10"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
+              }`}
+            >
+              <LogIn className="w-4 h-4" />
+              Login
+            </Link>
+          )}
         </nav>
 
         {/* Mobile Menu Button */}
@@ -100,6 +129,41 @@ const Header = () => {
                   </motion.div>
                 );
               })}
+
+              {/* Mobile Auth Link */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: navLinks.length * 0.1 }}
+              >
+                {member ? (
+                  <Link
+                    to="/profile"
+                    onClick={() => setIsMenuOpen(false)}
+                    className={`flex items-center gap-2 px-4 py-3 rounded-lg text-base font-medium transition-colors ${
+                      location.pathname === "/profile"
+                        ? "text-primary bg-primary/10"
+                        : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                    }`}
+                  >
+                    <User className="w-5 h-5" />
+                    My Profile
+                  </Link>
+                ) : (
+                  <Link
+                    to="/login"
+                    onClick={() => setIsMenuOpen(false)}
+                    className={`flex items-center gap-2 px-4 py-3 rounded-lg text-base font-medium transition-colors ${
+                      location.pathname === "/login"
+                        ? "text-primary bg-primary/10"
+                        : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                    }`}
+                  >
+                    <LogIn className="w-5 h-5" />
+                    Login
+                  </Link>
+                )}
+              </motion.div>
             </div>
           </motion.nav>
         )}
