@@ -75,16 +75,23 @@ const Home = () => {
       </section>
 
       {/* About Section */}
-      <section className="py-16 md:py-24 bg-gradient-warm">
-        <div className="container px-4">
+      <section className="py-16 md:py-24 bg-gradient-warm relative overflow-hidden">
+        {/* Decorative Elements */}
+        <div className="absolute top-0 left-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 right-0 w-48 h-48 bg-gold/10 rounded-full blur-3xl" />
+        
+        <div className="container px-4 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             className="max-w-3xl mx-auto text-center"
           >
+            <div className="divider-ornament mb-6">
+              <span className="text-gold text-2xl">✦</span>
+            </div>
             <h2 className="font-heading text-3xl md:text-4xl font-semibold text-foreground mb-6">
-              Our Sacred Journey
+              Our <span className="text-gradient">Sacred</span> Journey
             </h2>
             <p className="text-lg text-muted-foreground leading-relaxed">
               {siteMeta.heroDescription}
@@ -102,8 +109,11 @@ const Home = () => {
             viewport={{ once: true }}
             className="text-center mb-12"
           >
+            <span className="inline-block px-4 py-1.5 bg-gold/10 text-gold-dark dark:text-gold text-sm font-medium rounded-full mb-4">
+              Memorable Moments
+            </span>
             <h2 className="font-heading text-3xl md:text-4xl font-semibold text-foreground mb-4">
-              Trip Highlights
+              Trip <span className="text-gradient">Highlights</span>
             </h2>
             <p className="text-muted-foreground">The moments that made this trip unforgettable</p>
           </motion.div>
@@ -116,9 +126,12 @@ const Home = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                className="bg-card rounded-xl p-5 shadow-card border border-border/50 card-hover"
+                className="bg-card rounded-xl p-5 shadow-card border border-border/50 card-hover group image-shine"
               >
-                <p className="text-foreground font-medium">{highlight}</p>
+                <div className="flex items-start gap-3">
+                  <span className="text-xl">✨</span>
+                  <p className="text-foreground font-medium">{highlight}</p>
+                </div>
               </motion.div>
             ))}
           </div>
@@ -220,12 +233,12 @@ const Home = () => {
               >
                 <Link
                   to={item.to}
-                  className="block bg-card rounded-xl p-6 shadow-card border border-border/50 card-hover group"
+                  className="block bg-card rounded-xl p-6 shadow-card border border-border/50 card-hover group image-shine"
                 >
-                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-                    <item.icon className="w-6 h-6 text-primary" />
+                  <div className="w-12 h-12 rounded-xl bg-gradient-gold flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <item.icon className="w-6 h-6 text-foreground" />
                   </div>
-                  <h3 className="font-heading text-xl font-semibold text-foreground mb-2">
+                  <h3 className="font-heading text-xl font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
                     {item.title}
                   </h3>
                   <p className="text-muted-foreground text-sm">{item.desc}</p>
