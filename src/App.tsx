@@ -13,6 +13,7 @@ import Members from "./pages/Members";
 import MemberDetail from "./pages/MemberDetail";
 import Login from "./pages/Login";
 import Profile from "./pages/Profile";
+import UploadImage from "./pages/UploadImage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -35,6 +36,7 @@ const App = () => (
                 <Route path="/members/:uid" element={<MemberDetail />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/profile" element={<Profile />} />
+                <Route path="/upload" element={<UploadImage />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </main>

@@ -50,3 +50,27 @@ export const useMemberGallery = (uid: string) => {
     enabled: !!uid,
   });
 };
+
+// Fetch images where member is tagged
+export const useMemberTaggedImages = (uid: string) => {
+  return useQuery({
+    queryKey: ["member-tagged-images", uid],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("member_tags")
+        .select("gallery_id, gallery(*)")
+        .eq("member_uid", uid);
+      
+      if (error) throw error;
+      // Extract gallery data from the join
+      return data?.map(tag => tag.gallery).filter(Boolean) as Array<{
+        id: string;
+        src: string;
+        caption: string | null;
+        owner_uid: string;
+        uploaded_at: string;
+      }>;
+    },
+    enabled: !!uid,
+  });
+};

@@ -2,23 +2,32 @@ import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft, User, Quote } from "lucide-react";
-import { useMember, useMemberGallery } from "@/hooks/useMembers";
+import { useMember, useMemberGallery, useMemberTaggedImages } from "@/hooks/useMembers";
 import LazyImage from "@/components/LazyImage";
 import Lightbox from "@/components/Lightbox";
-import ImageUploadForm from "@/components/ImageUploadForm";
 
 const MemberDetail = () => {
   const { uid } = useParams<{ uid: string }>();
   const { data: member, isLoading, error } = useMember(uid || "");
-  const { data: galleryImages } = useMemberGallery(uid || "");
+  const { data: ownedImages } = useMemberGallery(uid || "");
+  const { data: taggedImages } = useMemberTaggedImages(uid || "");
   
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  const lightboxImages = galleryImages?.map((img) => ({
+  // Combine owned and tagged images, removing duplicates
+  const allImages = [...(ownedImages || [])];
+  const ownedIds = new Set(allImages.map(img => img.id));
+  taggedImages?.forEach(img => {
+    if (!ownedIds.has(img.id)) {
+      allImages.push(img);
+    }
+  });
+
+  const lightboxImages = allImages.map((img) => ({
     url: img.src,
     caption: img.caption || "",
-  })) || [];
+  }));
 
   const openLightbox = (index: number) => {
     setCurrentImageIndex(index);
@@ -117,20 +126,19 @@ const MemberDetail = () => {
           </div>
         </motion.div>
 
-        {/* Member's Gallery */}
+        {/* Member's Gallery - Owned + Tagged Images */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="mb-8"
         >
           <h2 className="font-heading text-2xl font-semibold text-foreground mb-6">
-            {member.name}'s Photos ({galleryImages?.length || 0})
+            {member.name}'s Photos ({allImages.length})
           </h2>
 
-          {galleryImages && galleryImages.length > 0 ? (
+          {allImages.length > 0 ? (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {galleryImages.map((image, index) => (
+              {allImages.map((image, index) => (
                 <button
                   key={image.id}
                   onClick={() => openLightbox(index)}
@@ -155,18 +163,9 @@ const MemberDetail = () => {
             </div>
           ) : (
             <div className="text-center py-8 bg-muted/30 rounded-xl">
-              <p className="text-muted-foreground">No photos uploaded yet</p>
+              <p className="text-muted-foreground">No photos available</p>
             </div>
           )}
-        </motion.div>
-
-        {/* Upload Form */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          <ImageUploadForm defaultUid={uid} />
         </motion.div>
       </div>
 
