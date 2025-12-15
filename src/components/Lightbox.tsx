@@ -1,10 +1,9 @@
 import { useEffect, useCallback, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ChevronLeft, ChevronRight, Download, Trash2, Tag, Loader2, Check } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
+import { X, ChevronLeft, ChevronRight, Download, Trash2, Tag, Loader2, Check, UserX } from "lucide-react";
 import { useDeleteImage, useTagMembers, downloadImage } from "@/hooks/useGalleryActions";
 import { useMembers } from "@/hooks/useMembers";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -18,17 +17,17 @@ interface LightboxProps {
 }
 
 const Lightbox = ({ images, currentIndex, isOpen, onClose, onNext, onPrev }: LightboxProps) => {
-  const { member } = useAuth();
   const currentImage = images[currentIndex];
   const [showTagPanel, setShowTagPanel] = useState(false);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   
+  const queryClient = useQueryClient();
   const { data: members } = useMembers();
   const deleteMutation = useDeleteImage();
   const tagMutation = useTagMembers();
 
-  // Fetch existing tags for current image
-  const { data: existingTags } = useQuery({
+  // Fetch existing tags for current image (always fetch when image has id)
+  const { data: existingTags, refetch: refetchTags } = useQuery({
     queryKey: ["image-tags", currentImage?.id],
     queryFn: async () => {
       if (!currentImage?.id) return [];
@@ -39,7 +38,7 @@ const Lightbox = ({ images, currentIndex, isOpen, onClose, onNext, onPrev }: Lig
       if (error) throw error;
       return data;
     },
-    enabled: !!currentImage?.id && showTagPanel,
+    enabled: !!currentImage?.id && isOpen,
   });
 
   useEffect(() => {
@@ -47,6 +46,11 @@ const Lightbox = ({ images, currentIndex, isOpen, onClose, onNext, onPrev }: Lig
       setSelectedTags(existingTags.map((t) => t.member_uid));
     }
   }, [existingTags]);
+
+  // Reset tag panel when image changes
+  useEffect(() => {
+    setShowTagPanel(false);
+  }, [currentIndex]);
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if (!isOpen) return;
@@ -92,14 +96,9 @@ const Lightbox = ({ images, currentIndex, isOpen, onClose, onNext, onPrev }: Lig
   };
 
   const handleDelete = async () => {
-    if (!currentImage?.id || !member) return;
-    
-    if (currentImage.ownerUid !== member.uid) {
-      toast.error("You can only delete your own images");
-      return;
-    }
+    if (!currentImage?.id) return;
 
-    if (!confirm("Are you sure you want to delete this image?")) return;
+    if (!confirm("Are you sure you want to delete this image? This cannot be undone.")) return;
 
     try {
       await deleteMutation.mutateAsync(currentImage.id);
@@ -107,6 +106,24 @@ const Lightbox = ({ images, currentIndex, isOpen, onClose, onNext, onPrev }: Lig
       onClose();
     } catch {
       toast.error("Failed to delete image");
+    }
+  };
+
+  const handleRemoveTag = async (memberUid: string) => {
+    if (!currentImage?.id) return;
+    
+    const newTags = selectedTags.filter(t => t !== memberUid);
+    
+    try {
+      await tagMutation.mutateAsync({
+        galleryId: currentImage.id,
+        memberUids: newTags,
+      });
+      setSelectedTags(newTags);
+      queryClient.invalidateQueries({ queryKey: ["member-tagged-images"] });
+      toast.success("Tag removed!");
+    } catch {
+      toast.error("Failed to remove tag");
     }
   };
 
@@ -124,6 +141,7 @@ const Lightbox = ({ images, currentIndex, isOpen, onClose, onNext, onPrev }: Lig
         galleryId: currentImage.id,
         memberUids: selectedTags,
       });
+      queryClient.invalidateQueries({ queryKey: ["member-tagged-images"] });
       toast.success("Tags saved!");
       setShowTagPanel(false);
     } catch {
@@ -131,7 +149,11 @@ const Lightbox = ({ images, currentIndex, isOpen, onClose, onNext, onPrev }: Lig
     }
   };
 
-  const canDelete = member && currentImage?.ownerUid === member.uid;
+  // Get tagged member names for display
+  const taggedMemberNames = existingTags?.map(t => {
+    const memberData = t.members as { name: string } | null;
+    return { uid: t.member_uid, name: memberData?.name || t.member_uid };
+  }) || [];
 
   return (
     <AnimatePresence>
@@ -178,8 +200,8 @@ const Lightbox = ({ images, currentIndex, isOpen, onClose, onNext, onPrev }: Lig
               </button>
             )}
 
-            {/* Delete (only for owner) */}
-            {canDelete && (
+            {/* Delete */}
+            {currentImage?.id && (
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -302,11 +324,36 @@ const Lightbox = ({ images, currentIndex, isOpen, onClose, onNext, onPrev }: Lig
               className="max-w-full max-h-[75vh] object-contain rounded-lg shadow-2xl"
             />
             
-            {/* Caption & Counter */}
+            {/* Caption, Tags & Counter */}
             <div className="mt-4 text-center">
               {currentImage.caption && (
                 <p className="text-primary-foreground text-lg mb-2">{currentImage.caption}</p>
               )}
+              
+              {/* Tagged Members Display */}
+              {taggedMemberNames.length > 0 && (
+                <div className="flex flex-wrap items-center justify-center gap-2 mb-2">
+                  {taggedMemberNames.map((tag) => (
+                    <span
+                      key={tag.uid}
+                      className="inline-flex items-center gap-1 px-2 py-1 bg-primary/20 text-primary-foreground rounded-full text-xs"
+                    >
+                      {tag.name}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRemoveTag(tag.uid);
+                        }}
+                        className="hover:bg-primary/30 rounded-full p-0.5"
+                        title={`Remove ${tag.name} tag`}
+                      >
+                        <UserX size={12} />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+              
               <p className="text-primary-foreground/60 text-sm">
                 {currentIndex + 1} / {images.length}
               </p>
