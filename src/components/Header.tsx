@@ -20,16 +20,16 @@ const Header = () => {
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+    <header className="sticky top-0 z-40 w-full border-b border-border/50 bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/80">
       <div className="container flex h-16 items-center justify-between">
         {/* Logo */}
         <Link 
           to="/" 
-          className="flex items-center gap-2 font-heading text-xl font-semibold text-foreground transition-colors hover:text-primary"
+          className="flex items-center gap-2 font-heading text-xl font-semibold text-foreground transition-colors hover:text-primary group"
         >
-          <span className="text-2xl">🙏</span>
-          <span className="hidden sm:inline">{siteMeta.title}</span>
-          <span className="sm:hidden">Tirupati Trip</span>
+          <span className="text-2xl group-hover:animate-pulse">🙏</span>
+          <span className="hidden sm:inline bg-gradient-gold bg-clip-text text-transparent">{siteMeta.title}</span>
+          <span className="sm:hidden bg-gradient-gold bg-clip-text text-transparent">Tirupati Trip</span>
         </Link>
 
         {/* Desktop Navigation */}
@@ -62,22 +62,24 @@ const Header = () => {
           {member ? (
             <Link
               to="/profile"
-              className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+              className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-full transition-all ${
                 location.pathname === "/profile"
-                  ? "text-primary bg-primary/10"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  ? "bg-primary text-primary-foreground shadow-glow"
+                  : "bg-primary/10 text-primary hover:bg-primary/20"
               }`}
             >
-              <User className="w-4 h-4" />
+              <div className="w-5 h-5 rounded-full bg-gradient-gold flex items-center justify-center">
+                <span className="text-xs font-bold text-foreground">{member.name.charAt(0)}</span>
+              </div>
               <span className="max-w-24 truncate">{member.name}</span>
             </Link>
           ) : (
             <Link
               to="/login"
-              className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+              className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-full transition-all ${
                 location.pathname === "/login"
-                  ? "text-primary bg-primary/10"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  ? "bg-primary text-primary-foreground shadow-glow"
+                  : "bg-primary/10 text-primary hover:bg-primary/20"
               }`}
             >
               <LogIn className="w-4 h-4" />

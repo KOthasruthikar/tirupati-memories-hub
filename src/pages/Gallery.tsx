@@ -50,9 +50,15 @@ const Gallery = () => {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-12"
         >
-          <h1 className="font-heading text-4xl md:text-5xl font-bold text-foreground mb-4">
-            Photo Gallery
+          <span className="inline-block px-4 py-1.5 bg-primary/10 text-primary text-sm font-medium rounded-full mb-4">
+            Sacred Memories
+          </span>
+          <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4">
+            <span className="text-gradient">Photo</span> Gallery
           </h1>
+          <div className="divider-ornament max-w-md mx-auto mb-4">
+            <span className="text-gold text-2xl">✦</span>
+          </div>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Relive the beautiful moments from our pilgrimage to Tirumala
           </p>
@@ -119,6 +125,22 @@ const Gallery = () => {
                   onClick={() => openLightbox(index)}
                   className="relative w-full rounded-xl overflow-hidden shadow-card card-hover group focus:outline-none focus:ring-2 focus:ring-primary/50"
                 >
+                  {/* Uploader Badge - Always Visible */}
+                  <Link
+                    to={`/members/${image.owner_uid}`}
+                    onClick={(e) => e.stopPropagation()}
+                    className="absolute top-3 left-3 z-10 flex items-center gap-2 px-2.5 py-1.5 bg-card/90 backdrop-blur-sm rounded-full border border-border/50 shadow-soft hover:bg-card transition-colors"
+                  >
+                    <div className="w-6 h-6 rounded-full bg-gradient-gold flex items-center justify-center">
+                      <span className="text-xs font-bold text-foreground">
+                        {image.members?.name?.charAt(0) || "?"}
+                      </span>
+                    </div>
+                    <span className="text-xs font-medium text-foreground">
+                      {image.members?.name || "Unknown"}
+                    </span>
+                  </Link>
+
                   <div
                     className="relative"
                     style={{
@@ -136,24 +158,14 @@ const Gallery = () => {
                     </div>
                   </div>
 
-                  {/* Overlay with Caption & Owner */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  {/* Hover Overlay with Caption */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <div className="absolute bottom-0 left-0 right-0 p-4">
                       {image.caption && (
-                        <p className="text-primary-foreground text-sm font-medium mb-1">
+                        <p className="text-primary-foreground text-sm font-medium line-clamp-2">
                           {image.caption}
                         </p>
                       )}
-                      <Link
-                        to={`/members/${image.owner_uid}`}
-                        onClick={(e) => e.stopPropagation()}
-                        className="inline-flex items-center gap-1 text-primary-foreground/80 text-xs hover:text-primary-foreground"
-                      >
-                        <span className="px-2 py-0.5 bg-primary/80 rounded text-primary-foreground">
-                          UID: {image.owner_uid}
-                        </span>
-                        <span>by {image.members?.name || "Unknown"}</span>
-                      </Link>
                     </div>
                   </div>
                 </button>
@@ -172,7 +184,7 @@ const Gallery = () => {
       {/* Floating Upload Button */}
       <Link
         to="/upload"
-        className="fixed bottom-6 right-6 z-40 flex items-center justify-center w-14 h-14 bg-primary text-primary-foreground rounded-full shadow-lg hover:bg-primary/90 hover:scale-110 transition-all duration-200"
+        className="fixed bottom-6 right-6 z-40 flex items-center justify-center w-14 h-14 bg-primary text-primary-foreground rounded-full shadow-glow hover:bg-primary/90 hover:scale-110 transition-all duration-300 btn-glow"
         title="Upload photo"
       >
         <Plus className="w-7 h-7" />
