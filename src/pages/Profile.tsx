@@ -3,7 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { User, Edit2, Save, X, Upload, Loader2, Camera, Image, LogOut } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useMemberGallery } from "@/hooks/useMembers";
+import { useMemberGallery, useMemberTaggedImages } from "@/hooks/useMembers";
 import LazyImage from "@/components/LazyImage";
 import Lightbox from "@/components/Lightbox";
 import ImageUploadForm from "@/components/ImageUploadForm";
@@ -13,7 +13,17 @@ import { toast } from "sonner";
 const Profile = () => {
   const navigate = useNavigate();
   const { member, isLoading, logout, updateMember } = useAuth();
-  const { data: galleryImages, refetch: refetchGallery } = useMemberGallery(member?.uid || "");
+  const { data: ownedImages } = useMemberGallery(member?.uid || "");
+  const { data: taggedImages } = useMemberTaggedImages(member?.uid || "");
+  
+  // Combine owned and tagged images, removing duplicates
+  const allImages = [...(ownedImages || [])];
+  const ownedIds = new Set(allImages.map(img => img.id));
+  taggedImages?.forEach(img => {
+    if (!ownedIds.has(img.id)) {
+      allImages.push(img);
+    }
+  });
   
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -110,10 +120,10 @@ const Profile = () => {
     toast.success("Logged out successfully");
   };
 
-  const lightboxImages = galleryImages?.map((img) => ({
+  const lightboxImages = allImages.map((img) => ({
     url: img.src,
     caption: img.caption || "",
-  })) || [];
+  }));
 
   if (isLoading) {
     return (
@@ -286,13 +296,13 @@ const Profile = () => {
           <div className="flex items-center gap-2 mb-6">
             <Image className="w-6 h-6 text-primary" />
             <h2 className="font-heading text-2xl font-semibold text-foreground">
-              My Photos ({galleryImages?.length || 0})
+              My Photos ({allImages.length})
             </h2>
           </div>
 
-          {galleryImages && galleryImages.length > 0 ? (
+          {allImages.length > 0 ? (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {galleryImages.map((image, index) => (
+              {allImages.map((image, index) => (
                 <button
                   key={image.id}
                   onClick={() => {

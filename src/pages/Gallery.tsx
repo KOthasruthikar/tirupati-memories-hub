@@ -1,11 +1,11 @@
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import { Plus } from "lucide-react";
 import { useGallery } from "@/hooks/useGallery";
 import { useMembers } from "@/hooks/useMembers";
 import LazyImage from "@/components/LazyImage";
 import Lightbox from "@/components/Lightbox";
-import ImageUploadForm from "@/components/ImageUploadForm";
 
 const Gallery = () => {
   const { data: galleryImages, isLoading: galleryLoading } = useGallery();
@@ -167,17 +167,16 @@ const Gallery = () => {
             </p>
           </div>
         )}
-
-        {/* Upload Form */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mt-16 max-w-md mx-auto"
-        >
-          <ImageUploadForm />
-        </motion.div>
       </div>
+
+      {/* Floating Upload Button */}
+      <Link
+        to="/upload"
+        className="fixed bottom-6 right-6 z-40 flex items-center justify-center w-14 h-14 bg-primary text-primary-foreground rounded-full shadow-lg hover:bg-primary/90 hover:scale-110 transition-all duration-200"
+        title="Upload photo"
+      >
+        <Plus className="w-7 h-7" />
+      </Link>
 
       {/* Lightbox */}
       <Lightbox
