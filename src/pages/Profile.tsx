@@ -1,12 +1,13 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { User, Edit2, Save, X, Upload, Loader2, Camera, Image, LogOut } from "lucide-react";
+import { User, Edit2, Save, X, Upload, Loader2, Camera, Image, LogOut, Shield } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useMemberGallery, useMemberTaggedImages } from "@/hooks/useMembers";
 import LazyImage from "@/components/LazyImage";
 import Lightbox from "@/components/Lightbox";
 import ImageUploadForm from "@/components/ImageUploadForm";
+import AccessRequestsPanel from "@/components/AccessRequestsPanel";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -331,8 +332,18 @@ const Profile = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
+          className="mb-8"
         >
           <ImageUploadForm defaultUid={member.uid} />
+        </motion.div>
+
+        {/* Access Requests Panel */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+        >
+          <AccessRequestsPanel ownerUid={member.uid} />
         </motion.div>
       </div>
 

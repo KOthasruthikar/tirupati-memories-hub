@@ -312,12 +312,73 @@ export const galleryImages: GalleryImage[] = [
 // ============================================
 // MAP CONFIGURATION
 // ============================================
-// REPLACE: Update with your actual travel route
+export interface RouteStop {
+  name: string;
+  description: string;
+  day: string;
+  icon: string;
+}
+
 export const mapConfig = {
-  // Google Maps embed URL - replace with your route
-  embedUrl: "https://www.google.com/maps/embed?pb=!1m28!1m12!1m3!1d248849.88654372378!2d79.29370047421875!3d13.6551!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!4m13!3e0!4m5!1s0x3a4d4b0fef456031%3A0xab862ac823e8c407!2sChennai%2C%20Tamil%20Nadu!3m2!1d13.0826802!2d80.2707184!4m5!1s0x3bb4a28d70e25009%3A0x4e4d4a9fdee0adf3!2sTirumala%2C%20Tirupati%2C%20Andhra%20Pradesh!3m2!1d13.6833!2d79.3500!5e0!3m2!1sen!2sin!4v1699999999999!5m2!1sen!2sin",
+  embedUrl: "https://www.google.com/maps/embed?pb=!1m46!1m12!1m3!1d497698.7731259!2d79.29370047421875!3d13.5551!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!4m31!3e0!4m5!1s0x3a4d4b0fef456031%3A0xab862ac823e8c407!2sChennai%2C%20Tamil%20Nadu!3m2!1d13.0826802!2d80.2707184!4m5!1s0x3bb55bba8d40c433%3A0x7b0681c2d5db4f7c!2sTiruchanoor%2C%20Andhra%20Pradesh!3m2!1d13.4607!2d79.4194!4m5!1s0x3bb55a6c1e51b3ef%3A0x2f56f7743b2c2a69!2sTirupati%2C%20Andhra%20Pradesh!3m2!1d13.6288!2d79.4192!4m5!1s0x3bb4a28d70e25009%3A0x4e4d4a9fdee0adf3!2sTirumala%2C%20Tirupati%2C%20Andhra%20Pradesh!3m2!1d13.6833!2d79.3500!4m5!1s0x3a4d4b0fef456031%3A0xab862ac823e8c407!2sChennai%2C%20Tamil%20Nadu!3m2!1d13.0826802!2d80.2707184!5e0!3m2!1sen!2sin!4v1699999999999!5m2!1sen!2sin",
   title: "Our Journey Route",
-  description: "The sacred path from Chennai to Tirumala",
+  description: "The sacred path from Chennai to Tirumala and back",
+  totalDistance: "280 km",
+  totalDuration: "3 Days",
+};
+
+export const routeStops: RouteStop[] = [
+  {
+    name: "Chennai",
+    description: "Starting point - Home city",
+    day: "Day 1",
+    icon: "🏠",
+  },
+  {
+    name: "Tiruchanoor",
+    description: "Padmavathi Temple - Evening Darshan",
+    day: "Day 1",
+    icon: "🛕",
+  },
+  {
+    name: "Tirupati",
+    description: "Overnight stay & preparations",
+    day: "Day 1",
+    icon: "🏨",
+  },
+  {
+    name: "Tirumala (Trek)",
+    description: "Sacred trek through seven hills",
+    day: "Day 2",
+    icon: "⛰️",
+  },
+  {
+    name: "Sri Venkateswara Temple",
+    description: "Divine Darshan - Main destination",
+    day: "Day 2",
+    icon: "🙏",
+  },
+  {
+    name: "Akasa Ganga",
+    description: "Holy waterfall visit",
+    day: "Day 3",
+    icon: "💧",
+  },
+  {
+    name: "Chennai",
+    description: "Return journey home",
+    day: "Day 3",
+    icon: "🏠",
+  },
+];
+
+// Trip statistics
+export const tripStats = {
+  totalMembers: 8,
+  totalPhotos: 150,
+  daysOfJourney: 3,
+  templeVisits: 4,
+  totalDistance: "280 km",
 };
 
 // ============================================
