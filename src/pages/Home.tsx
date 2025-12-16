@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowRight, Camera, MapPin, Users } from "lucide-react";
-import { siteMeta, highlights, galleryImages } from "@/data/seed";
+import { ArrowRight, Camera, MapPin, Users, Calendar, Mountain, Heart, Sparkles } from "lucide-react";
+import { siteMeta, highlights, galleryImages, tripStats, members } from "@/data/seed";
 import { Button } from "@/components/ui/button";
 import LazyImage from "@/components/LazyImage";
 import Lightbox from "@/components/Lightbox";
@@ -13,16 +13,24 @@ const Home = () => {
   
   const quickPhotos = galleryImages.slice(0, 4);
   const lightboxImages = quickPhotos.map((img) => ({ url: img.url, caption: img.caption }));
+  const featuredMembers = members.slice(0, 4);
 
   const openLightbox = (index: number) => {
     setCurrentImageIndex(index);
     setLightboxOpen(true);
   };
 
+  const stats = [
+    { icon: Users, value: tripStats.totalMembers, label: "Pilgrims" },
+    { icon: Calendar, value: tripStats.daysOfJourney, label: "Days" },
+    { icon: Mountain, value: tripStats.templeVisits, label: "Temples" },
+    { icon: Camera, value: `${tripStats.totalPhotos}+`, label: "Photos" },
+  ];
+
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative h-[70vh] md:h-[80vh] flex items-center justify-center overflow-hidden">
+      <section className="relative h-[80vh] md:h-[90vh] flex items-center justify-center overflow-hidden">
         {/* Background Image */}
         <div className="absolute inset-0">
           <LazyImage
@@ -31,6 +39,28 @@ const Home = () => {
             className="w-full h-full"
           />
           <div className="absolute inset-0 hero-overlay" />
+          {/* Animated Particles */}
+          <div className="absolute inset-0 overflow-hidden">
+            {[...Array(20)].map((_, i) => (
+              <motion.div
+                key={i}
+                className="absolute w-1 h-1 bg-gold/30 rounded-full"
+                style={{
+                  left: `${Math.random() * 100}%`,
+                  top: `${Math.random() * 100}%`,
+                }}
+                animate={{
+                  y: [-20, 20],
+                  opacity: [0.3, 0.8, 0.3],
+                }}
+                transition={{
+                  duration: 3 + Math.random() * 2,
+                  repeat: Infinity,
+                  delay: Math.random() * 2,
+                }}
+              />
+            ))}
+          </div>
         </div>
 
         {/* Hero Content */}
@@ -40,15 +70,21 @@ const Home = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <span className="inline-block text-4xl mb-4">🙏</span>
-            <h1 className="font-heading text-4xl md:text-6xl lg:text-7xl font-bold text-primary-foreground mb-4 drop-shadow-lg">
+            <motion.span 
+              className="inline-block text-5xl mb-4"
+              animate={{ scale: [1, 1.1, 1] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              🙏
+            </motion.span>
+            <h1 className="font-heading text-5xl md:text-7xl lg:text-8xl font-bold text-primary-foreground mb-4 drop-shadow-lg">
               {siteMeta.title}
             </h1>
-            <p className="text-lg md:text-xl text-primary-foreground/90 max-w-2xl mx-auto mb-8 drop-shadow">
+            <p className="text-xl md:text-2xl text-primary-foreground/90 max-w-2xl mx-auto mb-8 drop-shadow">
               {siteMeta.tagline}
             </p>
             <div className="flex flex-wrap justify-center gap-4">
-              <Button asChild size="lg" className="bg-primary-foreground text-primary hover:bg-primary-foreground/90">
+              <Button asChild size="lg" className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 btn-glow">
                 <Link to="/trip-details">
                   Explore Journey <ArrowRight className="ml-2 w-5 h-5" />
                 </Link>
@@ -74,6 +110,32 @@ const Home = () => {
         </motion.div>
       </section>
 
+      {/* Stats Section */}
+      <section className="py-12 bg-gradient-gold relative overflow-hidden">
+        <div className="container px-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
+            {stats.map((stat, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1 }}
+                className="text-center"
+              >
+                <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-background/20 backdrop-blur-sm flex items-center justify-center">
+                  <stat.icon className="w-7 h-7 text-foreground" />
+                </div>
+                <div className="text-3xl md:text-4xl font-heading font-bold text-foreground">
+                  {stat.value}
+                </div>
+                <div className="text-sm text-foreground/70">{stat.label}</div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* About Section */}
       <section className="py-16 md:py-24 bg-gradient-warm relative overflow-hidden">
         {/* Decorative Elements */}
@@ -90,10 +152,10 @@ const Home = () => {
             <div className="divider-ornament mb-6">
               <span className="text-gold text-2xl">✦</span>
             </div>
-            <h2 className="font-heading text-3xl md:text-4xl font-semibold text-foreground mb-6">
+            <h2 className="font-heading text-3xl md:text-5xl font-semibold text-foreground mb-6">
               Our <span className="text-gradient">Sacred</span> Journey
             </h2>
-            <p className="text-lg text-muted-foreground leading-relaxed">
+            <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
               {siteMeta.heroDescription}
             </p>
           </motion.div>
@@ -109,7 +171,8 @@ const Home = () => {
             viewport={{ once: true }}
             className="text-center mb-12"
           >
-            <span className="inline-block px-4 py-1.5 bg-gold/10 text-gold-dark dark:text-gold text-sm font-medium rounded-full mb-4">
+            <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-gold/10 text-gold-dark dark:text-gold text-sm font-medium rounded-full mb-4">
+              <Sparkles className="w-4 h-4" />
               Memorable Moments
             </span>
             <h2 className="font-heading text-3xl md:text-4xl font-semibold text-foreground mb-4">
@@ -138,8 +201,65 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Quick Photos Section */}
+      {/* Featured Members Section */}
       <section className="py-16 md:py-24 bg-muted/30">
+        <div className="container px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-12"
+          >
+            <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary/10 text-primary text-sm font-medium rounded-full mb-4">
+              <Heart className="w-4 h-4" />
+              Our Pilgrims
+            </span>
+            <h2 className="font-heading text-3xl md:text-4xl font-semibold text-foreground mb-4">
+              Meet the <span className="text-gradient">Travelers</span>
+            </h2>
+            <p className="text-muted-foreground">The wonderful people who made this journey special</p>
+          </motion.div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
+            {featuredMembers.map((member, index) => (
+              <motion.div
+                key={member.id}
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1 }}
+                className="text-center group"
+              >
+                <div className="relative w-24 h-24 md:w-32 md:h-32 mx-auto mb-4 rounded-full overflow-hidden ring-4 ring-primary/10 group-hover:ring-primary/30 transition-all duration-300">
+                  <LazyImage
+                    src={member.photo}
+                    alt={member.name}
+                    className="w-full h-full transition-transform duration-500 group-hover:scale-110"
+                  />
+                </div>
+                <h3 className="font-heading font-semibold text-foreground">{member.name}</h3>
+                <p className="text-sm text-muted-foreground">{member.role}</p>
+              </motion.div>
+            ))}
+          </div>
+
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            className="text-center mt-8"
+          >
+            <Button asChild variant="outline" size="lg">
+              <Link to="/members">
+                View All Members <ArrowRight className="ml-2 w-5 h-5" />
+              </Link>
+            </Button>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Quick Photos Section */}
+      <section className="py-16 md:py-24">
         <div className="container px-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -162,7 +282,7 @@ const Home = () => {
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
                 onClick={() => openLightbox(index)}
-                className="aspect-square rounded-xl overflow-hidden shadow-card card-hover focus:outline-none focus:ring-2 focus:ring-primary/50"
+                className="aspect-square rounded-xl overflow-hidden shadow-card card-hover focus:outline-none focus:ring-2 focus:ring-primary/50 image-shine"
                 aria-label={`View ${photo.caption}`}
               >
                 <LazyImage
@@ -190,7 +310,7 @@ const Home = () => {
       </section>
 
       {/* Navigation Cards */}
-      <section className="py-16 md:py-24">
+      <section className="py-16 md:py-24 bg-muted/30">
         <div className="container px-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -209,19 +329,22 @@ const Home = () => {
                 to: "/trip-details", 
                 icon: MapPin, 
                 title: "Trip Details", 
-                desc: "Complete timeline of our sacred journey" 
+                desc: "Complete timeline of our sacred journey",
+                color: "from-orange-500 to-amber-500"
               },
               { 
                 to: "/gallery", 
                 icon: Camera, 
                 title: "Photo Gallery", 
-                desc: "Beautiful memories captured forever" 
+                desc: "Beautiful memories captured forever",
+                color: "from-blue-500 to-cyan-500"
               },
               { 
                 to: "/members", 
                 icon: Users, 
                 title: "Our Members", 
-                desc: "Meet the pilgrims of this journey" 
+                desc: "Meet the pilgrims of this journey",
+                color: "from-purple-500 to-pink-500"
               },
             ].map((item, index) => (
               <motion.div
@@ -235,8 +358,8 @@ const Home = () => {
                   to={item.to}
                   className="block bg-card rounded-xl p-6 shadow-card border border-border/50 card-hover group image-shine"
                 >
-                  <div className="w-12 h-12 rounded-xl bg-gradient-gold flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <item.icon className="w-6 h-6 text-foreground" />
+                  <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${item.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-lg`}>
+                    <item.icon className="w-7 h-7 text-white" />
                   </div>
                   <h3 className="font-heading text-xl font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
                     {item.title}

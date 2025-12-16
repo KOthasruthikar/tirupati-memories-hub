@@ -1,9 +1,9 @@
 import { useState, useMemo, useRef } from "react";
-import { motion } from "framer-motion";
-import { Search, Filter, Download, FileText } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Search, Filter, Download, FileText, Calendar, MapPin, Clock, Sparkles } from "lucide-react";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
-import { timelineEvents, availableTags, siteMeta } from "@/data/seed";
+import { timelineEvents, availableTags, siteMeta, tripStats } from "@/data/seed";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -77,13 +77,12 @@ const TripDetails = () => {
         format: "a4",
       });
 
-      const imgWidth = 210; // A4 width in mm
-      const pageHeight = 297; // A4 height in mm
+      const imgWidth = 210;
+      const pageHeight = 297;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
       let heightLeft = imgHeight;
       let position = 0;
 
-      // Add title
       pdf.setFontSize(24);
       pdf.setTextColor(139, 69, 19);
       pdf.text(siteMeta.title, 105, 20, { align: "center" });
@@ -121,6 +120,12 @@ const TripDetails = () => {
     }
   };
 
+  const quickStats = [
+    { icon: Calendar, value: `${tripStats.daysOfJourney} Days`, label: "Duration" },
+    { icon: MapPin, value: tripStats.totalDistance, label: "Distance" },
+    { icon: Sparkles, value: tripStats.templeVisits, label: "Temples" },
+  ];
+
   return (
     <div className="min-h-screen py-8 md:py-12">
       <div className="container px-4">
@@ -130,19 +135,53 @@ const TripDetails = () => {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-12"
         >
-          <h1 className="font-heading text-4xl md:text-5xl font-bold text-foreground mb-4">
-            Trip Details
+          <motion.span 
+            className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary/10 text-primary text-sm font-medium rounded-full mb-4"
+            initial={{ scale: 0.9 }}
+            animate={{ scale: 1 }}
+          >
+            <MapPin className="w-4 h-4" />
+            Our Sacred Journey
+          </motion.span>
+          <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4">
+            Trip <span className="text-gradient">Details</span>
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Follow our complete journey through the sacred hills of Tirumala
           </p>
         </motion.div>
 
-        {/* Filters & Actions */}
+        {/* Quick Stats */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
+          className="flex flex-wrap justify-center gap-4 md:gap-8 mb-8"
+        >
+          {quickStats.map((stat, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.1 + index * 0.05 }}
+              className="flex items-center gap-3 px-5 py-3 bg-card rounded-xl shadow-card border border-border/50"
+            >
+              <div className="p-2 rounded-lg bg-primary/10">
+                <stat.icon className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <p className="font-heading font-bold text-foreground">{stat.value}</p>
+                <p className="text-xs text-muted-foreground">{stat.label}</p>
+              </div>
+            </motion.div>
+          ))}
+        </motion.div>
+
+        {/* Filters & Actions */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
           className="bg-card rounded-xl p-4 md:p-6 shadow-card border border-border/50 mb-8"
         >
           <div className="flex flex-col md:flex-row gap-4">
@@ -196,10 +235,22 @@ const TripDetails = () => {
             </Button>
           </div>
 
-          {/* Results count */}
-          <p className="text-sm text-muted-foreground mt-4">
-            Showing {filteredEvents.length} of {timelineEvents.length} events
-          </p>
+          {/* Results count & Tag Pills */}
+          <div className="flex flex-wrap items-center gap-2 mt-4">
+            <p className="text-sm text-muted-foreground">
+              Showing {filteredEvents.length} of {timelineEvents.length} events
+            </p>
+            {selectedTag !== "All" && (
+              <motion.button
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                onClick={() => setSelectedTag("All")}
+                className="px-3 py-1 text-xs bg-primary/10 text-primary rounded-full hover:bg-primary/20 transition-colors"
+              >
+                {selectedTag} ×
+              </motion.button>
+            )}
+          </div>
         </motion.div>
 
         {/* Timeline */}
@@ -210,25 +261,40 @@ const TripDetails = () => {
           className="mb-12"
           ref={timelineRef}
         >
-          {filteredEvents.length > 0 ? (
-            <Timeline events={filteredEvents} onImageClick={handleImageClick} />
-          ) : (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground text-lg">
-                No events found matching your search.
-              </p>
-              <Button
-                variant="outline"
-                className="mt-4"
-                onClick={() => {
-                  setSearchQuery("");
-                  setSelectedTag("All");
-                }}
+          <AnimatePresence mode="wait">
+            {filteredEvents.length > 0 ? (
+              <motion.div
+                key="timeline"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
               >
-                Clear Filters
-              </Button>
-            </div>
-          )}
+                <Timeline events={filteredEvents} onImageClick={handleImageClick} />
+              </motion.div>
+            ) : (
+              <motion.div
+                key="empty"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="text-center py-12 bg-card rounded-xl border border-border/50"
+              >
+                <Search className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground text-lg mb-4">
+                  No events found matching your search.
+                </p>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setSearchQuery("");
+                    setSelectedTag("All");
+                  }}
+                >
+                  Clear Filters
+                </Button>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </motion.div>
 
         {/* Map Section */}
@@ -237,9 +303,14 @@ const TripDetails = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
         >
-          <h2 className="font-heading text-2xl md:text-3xl font-semibold text-foreground mb-6">
-            Our Route
-          </h2>
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 rounded-lg bg-primary/10">
+              <MapPin className="w-6 h-6 text-primary" />
+            </div>
+            <h2 className="font-heading text-2xl md:text-3xl font-semibold text-foreground">
+              Our Route
+            </h2>
+          </div>
           <MapEmbed />
         </motion.div>
       </div>

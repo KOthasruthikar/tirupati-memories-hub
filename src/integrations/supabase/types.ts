@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      access_requests: {
+        Row: {
+          created_at: string
+          id: string
+          owner_uid: string
+          requester_uid: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          owner_uid: string
+          requester_uid: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          owner_uid?: string
+          requester_uid?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       gallery: {
         Row: {
           caption: string | null
