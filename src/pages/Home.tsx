@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowRight, Camera, MapPin, Users, Calendar, Mountain, Heart, Sparkles } from "lucide-react";
+import { ArrowRight, Camera, MapPin, Users, Calendar, Mountain, Heart, Sparkles, Play } from "lucide-react";
 import { siteMeta, highlights, galleryImages, tripStats, members } from "@/data/seed";
 import { Button } from "@/components/ui/button";
 import LazyImage from "@/components/LazyImage";
 import Lightbox from "@/components/Lightbox";
+import PhotoCarousel from "@/components/PhotoCarousel";
 
 const Home = () => {
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -258,7 +259,50 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Quick Photos Section */}
+      {/* Photo Slideshow Section */}
+      <section className="py-16 md:py-24 bg-gradient-to-b from-background to-muted/30">
+        <div className="container px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-12"
+          >
+            <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary/10 text-primary text-sm font-medium rounded-full mb-4">
+              <Play className="w-4 h-4" />
+              Auto-Playing Slideshow
+            </span>
+            <h2 className="font-heading text-3xl md:text-4xl font-semibold text-foreground mb-4">
+              Recent <span className="text-gradient">Memories</span>
+            </h2>
+            <p className="text-muted-foreground">Watch our cherished moments come to life</p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            className="max-w-5xl mx-auto"
+          >
+            <PhotoCarousel autoPlayInterval={4000} maxPhotos={8} />
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            className="text-center mt-8"
+          >
+            <Button asChild variant="outline" size="lg">
+              <Link to="/gallery">
+                View Full Gallery <ArrowRight className="ml-2 w-5 h-5" />
+              </Link>
+            </Button>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Quick Photos Grid */}
       <section className="py-16 md:py-24">
         <div className="container px-4">
           <motion.div

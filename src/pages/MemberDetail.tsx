@@ -66,6 +66,7 @@ const MemberDetail = () => {
       await requestAccess.mutateAsync({
         requesterUid: currentUser.uid,
         ownerUid: uid,
+        requesterName: currentUser.name,
       });
       toast.success("Access request sent!");
     } catch (error: any) {

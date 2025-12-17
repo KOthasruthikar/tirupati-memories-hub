@@ -39,7 +39,22 @@ export type Database = {
           status?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "access_requests_owner_uid_fkey"
+            columns: ["owner_uid"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["uid"]
+          },
+          {
+            foreignKeyName: "access_requests_requester_uid_fkey"
+            columns: ["requester_uid"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["uid"]
+          },
+        ]
       }
       gallery: {
         Row: {

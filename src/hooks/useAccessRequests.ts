@@ -96,9 +96,11 @@ export const useRequestAccess = () => {
     mutationFn: async ({
       requesterUid,
       ownerUid,
+      requesterName,
     }: {
       requesterUid: string;
       ownerUid: string;
+      requesterName: string;
     }) => {
       const { data, error } = await supabase
         .from("access_requests")
@@ -111,6 +113,12 @@ export const useRequestAccess = () => {
         .single();
 
       if (error) throw error;
+
+      // Send email notification (non-blocking)
+      supabase.functions.invoke("send-access-notification", {
+        body: { requesterUid, ownerUid, requesterName },
+      }).catch((err) => console.error("Failed to send notification:", err));
+
       return data;
     },
     onSuccess: (_, variables) => {
