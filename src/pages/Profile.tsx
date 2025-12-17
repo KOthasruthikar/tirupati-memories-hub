@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { User, Edit2, Save, X, Upload, Loader2, Camera, Image, LogOut, Shield } from "lucide-react";
+import { User, Edit2, Save, X, Loader2, Camera, Image, LogOut, Mail, Phone, AlertCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useMemberGallery, useMemberTaggedImages } from "@/hooks/useMembers";
 import LazyImage from "@/components/LazyImage";
@@ -35,6 +35,8 @@ const Profile = () => {
     role: "",
     memory: "",
     bio: "",
+    email: "",
+    phone: "",
   });
   
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -49,6 +51,8 @@ const Profile = () => {
         role: member.role,
         memory: member.memory,
         bio: member.bio,
+        email: member.email || "",
+        phone: member.phone || "",
       });
     }
   }, [member]);
@@ -262,6 +266,8 @@ const Profile = () => {
                           role: member.role,
                           memory: member.memory,
                           bio: member.bio,
+                          email: member.email || "",
+                          phone: member.phone || "",
                         });
                       }}
                       className="flex items-center gap-2 px-4 py-2 bg-muted text-muted-foreground rounded-lg hover:bg-muted/80 transition-colors"

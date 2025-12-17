@@ -8,10 +8,12 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 import Home from "./pages/Home";
 import TripDetails from "./pages/TripDetails";
+import TripMap from "./pages/TripMap";
 import Gallery from "./pages/Gallery";
 import Members from "./pages/Members";
 import MemberDetail from "./pages/MemberDetail";
 import Login from "./pages/Login";
+import ForgotPassword from "./pages/ForgotPassword";
 import Profile from "./pages/Profile";
 import UploadImage from "./pages/UploadImage";
 import NotFound from "./pages/NotFound";
@@ -31,10 +33,12 @@ const App = () => (
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/trip-details" element={<TripDetails />} />
+                <Route path="/map" element={<TripMap />} />
                 <Route path="/gallery" element={<Gallery />} />
                 <Route path="/members" element={<Members />} />
                 <Route path="/members/:uid" element={<MemberDetail />} />
                 <Route path="/login" element={<Login />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/upload" element={<UploadImage />} />
                 <Route path="*" element={<NotFound />} />
