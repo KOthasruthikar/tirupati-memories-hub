@@ -128,30 +128,42 @@ export type Database = {
         Row: {
           bio: string
           created_at: string
+          email: string | null
           memory: string
           name: string
           password_hash: string | null
+          phone: string | null
           profile_image: string
+          recovery_code: string | null
+          recovery_code_expires_at: string | null
           role: string
           uid: string
         }
         Insert: {
           bio: string
           created_at?: string
+          email?: string | null
           memory: string
           name: string
           password_hash?: string | null
+          phone?: string | null
           profile_image: string
+          recovery_code?: string | null
+          recovery_code_expires_at?: string | null
           role: string
           uid: string
         }
         Update: {
           bio?: string
           created_at?: string
+          email?: string | null
           memory?: string
           name?: string
           password_hash?: string | null
+          phone?: string | null
           profile_image?: string
+          recovery_code?: string | null
+          recovery_code_expires_at?: string | null
           role?: string
           uid?: string
         }
@@ -162,8 +174,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      member_generate_recovery_code: { Args: { p_uid: string }; Returns: Json }
       member_login: {
         Args: { p_password: string; p_uid: string }
+        Returns: Json
+      }
+      member_reset_password_with_code: {
+        Args: { p_code: string; p_new_password: string; p_uid: string }
         Returns: Json
       }
       member_set_password: {

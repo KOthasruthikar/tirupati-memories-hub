@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowRight, Camera, MapPin, Users, Calendar, Mountain, Heart, Sparkles, Play } from "lucide-react";
-import { siteMeta, highlights, galleryImages, tripStats, members } from "@/data/seed";
+import { ArrowRight, Camera, MapPin, Users, Calendar, Mountain, Heart, Sparkles, Play, Map } from "lucide-react";
+import { siteMeta, highlights, tripStats } from "@/data/seed";
+import { useHomeMembers, useHomeGallery, useGalleryCount, useMembersCount } from "@/hooks/useHomeData";
 import { Button } from "@/components/ui/button";
 import LazyImage from "@/components/LazyImage";
 import Lightbox from "@/components/Lightbox";
@@ -12,9 +13,12 @@ const Home = () => {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   
-  const quickPhotos = galleryImages.slice(0, 4);
-  const lightboxImages = quickPhotos.map((img) => ({ url: img.url, caption: img.caption }));
-  const featuredMembers = members.slice(0, 4);
+  const { data: featuredMembers = [] } = useHomeMembers(4);
+  const { data: quickPhotos = [] } = useHomeGallery(4);
+  const { data: totalPhotos = 0 } = useGalleryCount();
+  const { data: totalMembers = 0 } = useMembersCount();
+  
+  const lightboxImages = quickPhotos.map((img) => ({ url: img.src, caption: img.caption || "" }));
 
   const openLightbox = (index: number) => {
     setCurrentImageIndex(index);
@@ -22,10 +26,10 @@ const Home = () => {
   };
 
   const stats = [
-    { icon: Users, value: tripStats.totalMembers, label: "Pilgrims" },
+    { icon: Users, value: totalMembers || tripStats.totalMembers, label: "Pilgrims" },
     { icon: Calendar, value: tripStats.daysOfJourney, label: "Days" },
     { icon: Mountain, value: tripStats.templeVisits, label: "Temples" },
-    { icon: Camera, value: `${tripStats.totalPhotos}+`, label: "Photos" },
+    { icon: Camera, value: `${totalPhotos || tripStats.totalPhotos}+`, label: "Photos" },
   ];
 
   return (
@@ -224,22 +228,24 @@ const Home = () => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
             {featuredMembers.map((member, index) => (
               <motion.div
-                key={member.id}
+                key={member.uid}
                 initial={{ opacity: 0, scale: 0.9 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
                 className="text-center group"
               >
-                <div className="relative w-24 h-24 md:w-32 md:h-32 mx-auto mb-4 rounded-full overflow-hidden ring-4 ring-primary/10 group-hover:ring-primary/30 transition-all duration-300">
-                  <LazyImage
-                    src={member.photo}
-                    alt={member.name}
-                    className="w-full h-full transition-transform duration-500 group-hover:scale-110"
-                  />
-                </div>
-                <h3 className="font-heading font-semibold text-foreground">{member.name}</h3>
-                <p className="text-sm text-muted-foreground">{member.role}</p>
+                <Link to={`/members/${member.uid}`}>
+                  <div className="relative w-24 h-24 md:w-32 md:h-32 mx-auto mb-4 rounded-full overflow-hidden ring-4 ring-primary/10 group-hover:ring-primary/30 transition-all duration-300">
+                    <LazyImage
+                      src={member.profile_image}
+                      alt={member.name}
+                      className="w-full h-full transition-transform duration-500 group-hover:scale-110"
+                    />
+                  </div>
+                  <h3 className="font-heading font-semibold text-foreground group-hover:text-primary transition-colors">{member.name}</h3>
+                  <p className="text-sm text-muted-foreground">{member.role}</p>
+                </Link>
               </motion.div>
             ))}
           </div>
@@ -303,55 +309,57 @@ const Home = () => {
       </section>
 
       {/* Quick Photos Grid */}
-      <section className="py-16 md:py-24">
-        <div className="container px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-12"
-          >
-            <h2 className="font-heading text-3xl md:text-4xl font-semibold text-foreground mb-4">
-              Quick Glimpse
-            </h2>
-            <p className="text-muted-foreground">A preview of our cherished memories</p>
-          </motion.div>
+      {quickPhotos.length > 0 && (
+        <section className="py-16 md:py-24">
+          <div className="container px-4">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-center mb-12"
+            >
+              <h2 className="font-heading text-3xl md:text-4xl font-semibold text-foreground mb-4">
+                Quick Glimpse
+              </h2>
+              <p className="text-muted-foreground">A preview of our cherished memories</p>
+            </motion.div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-5xl mx-auto">
-            {quickPhotos.map((photo, index) => (
-              <motion.button
-                key={photo.id}
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                onClick={() => openLightbox(index)}
-                className="aspect-square rounded-xl overflow-hidden shadow-card card-hover focus:outline-none focus:ring-2 focus:ring-primary/50 image-shine"
-                aria-label={`View ${photo.caption}`}
-              >
-                <LazyImage
-                  src={photo.url}
-                  alt={photo.caption}
-                  className="w-full h-full transition-transform duration-500 hover:scale-110"
-                />
-              </motion.button>
-            ))}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-5xl mx-auto">
+              {quickPhotos.map((photo, index) => (
+                <motion.button
+                  key={photo.id}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                  onClick={() => openLightbox(index)}
+                  className="aspect-square rounded-xl overflow-hidden shadow-card card-hover focus:outline-none focus:ring-2 focus:ring-primary/50 image-shine"
+                  aria-label={`View ${photo.caption || "photo"}`}
+                >
+                  <LazyImage
+                    src={photo.src}
+                    alt={photo.caption || "Gallery photo"}
+                    className="w-full h-full transition-transform duration-500 hover:scale-110"
+                  />
+                </motion.button>
+              ))}
+            </div>
+
+            <motion.div
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              className="text-center mt-8"
+            >
+              <Button asChild variant="outline" size="lg">
+                <Link to="/gallery">
+                  View Full Gallery <ArrowRight className="ml-2 w-5 h-5" />
+                </Link>
+              </Button>
+            </motion.div>
           </div>
-
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            className="text-center mt-8"
-          >
-            <Button asChild variant="outline" size="lg">
-              <Link to="/gallery">
-                View Full Gallery <ArrowRight className="ml-2 w-5 h-5" />
-              </Link>
-            </Button>
-          </motion.div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Navigation Cards */}
       <section className="py-16 md:py-24 bg-muted/30">
@@ -367,7 +375,7 @@ const Home = () => {
             </h2>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto">
             {[
               { 
                 to: "/trip-details", 
@@ -375,6 +383,13 @@ const Home = () => {
                 title: "Trip Details", 
                 desc: "Complete timeline of our sacred journey",
                 color: "from-orange-500 to-amber-500"
+              },
+              { 
+                to: "/map", 
+                icon: Map, 
+                title: "Trip Map", 
+                desc: "Follow our route from Cherlapallu to Vijayawada",
+                color: "from-green-500 to-emerald-500"
               },
               { 
                 to: "/gallery", 
@@ -400,7 +415,7 @@ const Home = () => {
               >
                 <Link
                   to={item.to}
-                  className="block bg-card rounded-xl p-6 shadow-card border border-border/50 card-hover group image-shine"
+                  className="block bg-card rounded-xl p-6 shadow-card border border-border/50 card-hover group image-shine h-full"
                 >
                   <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${item.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-lg`}>
                     <item.icon className="w-7 h-7 text-white" />

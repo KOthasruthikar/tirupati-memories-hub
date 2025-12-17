@@ -6,6 +6,8 @@ export interface DbMember {
   memory: string;
   bio: string;
   profile_image: string;
+  email?: string | null;
+  phone?: string | null;
   created_at: string;
 }
 

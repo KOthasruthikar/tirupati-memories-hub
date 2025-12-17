@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { LogIn, KeyRound, Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -171,14 +171,22 @@ const Login = () => {
             </button>
           </form>
 
-          <div className="mt-6 text-center">
+          <div className="mt-6 text-center space-y-2">
             {mode === "login" ? (
-              <button
-                onClick={() => setMode("set-password")}
-                className="text-sm text-primary hover:underline"
-              >
-                First time? Set your password
-              </button>
+              <>
+                <button
+                  onClick={() => setMode("set-password")}
+                  className="block w-full text-sm text-primary hover:underline"
+                >
+                  First time? Set your password
+                </button>
+                <Link
+                  to="/forgot-password"
+                  className="block text-sm text-muted-foreground hover:text-foreground"
+                >
+                  Forgot your password?
+                </Link>
+              </>
             ) : (
               <button
                 onClick={() => setMode("login")}
