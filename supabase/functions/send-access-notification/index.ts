@@ -38,7 +38,7 @@ serve(async (req) => {
 
     const { data: owner, error: ownerError } = await supabase
       .from("members")
-      .select("name, uid")
+      .select("name, uid, email")
       .eq("uid", ownerUid)
       .single();
 
@@ -50,9 +50,18 @@ serve(async (req) => {
       );
     }
 
+    // Check if owner has email set
+    if (!owner.email) {
+      console.log(`Owner ${owner.name} has no email set - skipping notification`);
+      return new Response(
+        JSON.stringify({ success: true, message: "Owner has no email configured" }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     console.log(`Access request notification:
       From: ${requesterName} (${requesterUid})
-      To: ${owner.name} (${ownerUid})
+      To: ${owner.name} (${ownerUid}) - ${owner.email}
     `);
 
     // Send email using Resend API directly
@@ -64,7 +73,7 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         from: "Tirupati Trip <onboarding@resend.dev>",
-        to: ["delivered@resend.dev"], // Placeholder - replace with actual member email
+        to: [owner.email],
         subject: `${requesterName} wants to view your photos`,
         html: `
           <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
