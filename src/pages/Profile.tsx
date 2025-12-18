@@ -140,6 +140,8 @@ const Profile = () => {
 
   if (!member) return null;
 
+  const needsEmail = !member.email;
+
   return (
     <div className="min-h-screen py-8 md:py-12">
       <div className="container px-4 max-w-4xl mx-auto">
@@ -154,6 +156,29 @@ const Profile = () => {
             Logout
           </button>
         </div>
+
+        {/* Email Required Banner */}
+        {needsEmail && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl flex items-start gap-3"
+          >
+            <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="font-medium text-amber-800 dark:text-amber-200">Add your email address</p>
+              <p className="text-sm text-amber-700 dark:text-amber-300">
+                Add an email to receive notifications when someone requests access to your photos.
+              </p>
+              <button
+                onClick={() => setIsEditing(true)}
+                className="mt-2 text-sm font-medium text-amber-800 dark:text-amber-200 hover:underline"
+              >
+                Edit profile to add email →
+              </button>
+            </div>
+          </motion.div>
+        )}
 
         {/* Profile Card */}
         <motion.div
@@ -246,9 +271,31 @@ const Profile = () => {
                     value={editForm.bio}
                     onChange={(e) => setEditForm({ ...editForm, bio: e.target.value })}
                     placeholder="Your bio"
-                    rows={4}
+                    rows={3}
                     className="w-full px-4 py-2 rounded-lg bg-background border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none"
                   />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <input
+                        type="email"
+                        value={editForm.email}
+                        onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                        placeholder="Your email (for notifications)"
+                        className="w-full pl-10 pr-4 py-2 rounded-lg bg-background border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                      />
+                    </div>
+                    <div className="relative">
+                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <input
+                        type="tel"
+                        value={editForm.phone}
+                        onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                        placeholder="Your phone number"
+                        className="w-full pl-10 pr-4 py-2 rounded-lg bg-background border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                      />
+                    </div>
+                  </div>
                   <div className="flex gap-2">
                     <button
                       onClick={handleSave}
@@ -286,7 +333,23 @@ const Profile = () => {
                   <div className="bg-muted/50 rounded-xl p-4 mb-4">
                     <p className="text-muted-foreground italic">"{member.memory}"</p>
                   </div>
-                  <p className="text-foreground leading-relaxed">{member.bio}</p>
+                  <p className="text-foreground leading-relaxed mb-4">{member.bio}</p>
+                  
+                  {/* Contact Info */}
+                  <div className="flex flex-wrap gap-4 text-sm">
+                    {member.email && (
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <Mail className="w-4 h-4" />
+                        <span>{member.email}</span>
+                      </div>
+                    )}
+                    {member.phone && (
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <Phone className="w-4 h-4" />
+                        <span>{member.phone}</span>
+                      </div>
+                    )}
+                  </div>
                 </>
               )}
             </div>
