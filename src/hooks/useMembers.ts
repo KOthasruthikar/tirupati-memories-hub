@@ -14,6 +14,8 @@ export const useMembers = () => {
       if (error) throw error;
       return data as DbMember[];
     },
+    staleTime: 5 * 60 * 1000,
+    retry: 3,
   });
 };
 
@@ -31,6 +33,8 @@ export const useMember = (uid: string) => {
       return data as DbMember | null;
     },
     enabled: !!uid,
+    staleTime: 5 * 60 * 1000,
+    retry: 3,
   });
 };
 
@@ -48,6 +52,8 @@ export const useMemberGallery = (uid: string) => {
       return data;
     },
     enabled: !!uid,
+    staleTime: 5 * 60 * 1000,
+    retry: 3,
   });
 };
 
@@ -62,7 +68,6 @@ export const useMemberTaggedImages = (uid: string) => {
         .eq("member_uid", uid);
       
       if (error) throw error;
-      // Extract gallery data from the join
       return data?.map(tag => tag.gallery).filter(Boolean) as Array<{
         id: string;
         src: string;
@@ -72,5 +77,7 @@ export const useMemberTaggedImages = (uid: string) => {
       }>;
     },
     enabled: !!uid,
+    staleTime: 5 * 60 * 1000,
+    retry: 3,
   });
 };

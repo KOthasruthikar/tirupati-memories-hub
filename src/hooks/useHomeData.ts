@@ -14,6 +14,8 @@ export const useHomeMembers = (limit: number = 4) => {
       if (error) throw error;
       return data;
     },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: 3,
   });
 };
 
@@ -30,6 +32,8 @@ export const useHomeGallery = (limit: number = 8) => {
       if (error) throw error;
       return data;
     },
+    staleTime: 5 * 60 * 1000,
+    retry: 3,
   });
 };
 
@@ -44,6 +48,8 @@ export const useGalleryCount = () => {
       if (error) throw error;
       return count || 0;
     },
+    staleTime: 5 * 60 * 1000,
+    retry: 3,
   });
 };
 
@@ -58,5 +64,7 @@ export const useMembersCount = () => {
       if (error) throw error;
       return count || 0;
     },
+    staleTime: 5 * 60 * 1000,
+    retry: 3,
   });
 };
