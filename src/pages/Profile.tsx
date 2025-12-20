@@ -190,7 +190,7 @@ const Profile = () => {
             {/* Profile Image with Upload */}
             <div className="relative mx-auto md:mx-0">
               <div className="relative w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden ring-4 ring-primary/20">
-                {member.profile_image && member.profile_image !== "/placeholder.svg" ? (
+                {member.profile_image && member.profile_image !== "/placeholder.jpg" ? (
                   <LazyImage
                     src={member.profile_image}
                     alt={member.name}

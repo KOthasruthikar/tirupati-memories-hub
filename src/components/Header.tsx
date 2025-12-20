@@ -8,8 +8,10 @@ import { useAuth } from "@/contexts/AuthContext";
 const navLinks = [
   { path: "/", label: "Home" },
   { path: "/trip-details", label: "Trip Details" },
+  { path: "/map", label: "Trip Map" },
   { path: "/gallery", label: "Gallery" },
   { path: "/members", label: "Members" },
+  { path: "/blessings", label: "Take Blessings" },
 ];
 
 const Header = () => {
@@ -23,14 +25,25 @@ const Header = () => {
     <header className="sticky top-0 z-40 w-full border-b border-border/50 bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/80">
       <div className="container flex h-16 items-center justify-between">
         {/* Logo */}
-        <Link 
-          to="/" 
-          className="flex items-center gap-2 font-heading text-xl font-semibold text-foreground transition-colors hover:text-primary group"
-        >
-          <span className="text-2xl group-hover:animate-pulse">🙏</span>
-          <span className="hidden sm:inline bg-gradient-gold bg-clip-text text-transparent">{siteMeta.title}</span>
-          <span className="sm:hidden bg-gradient-gold bg-clip-text text-transparent">Tirupati Trip</span>
-        </Link>
+        <Link
+  to="/"
+  className="flex items-center gap-2 font-heading text-xl font-semibold transition-colors hover:text-primary group"
+>
+  <img
+    src="https://image2url.com/images/1766062560193-a3c4ef5d-ffe6-42f8-9859-b83c0f089bab.png"
+    alt="Tirupati Trip Logo"
+    className="h-12 w-auto object-contain group-hover:scale-105 transition-transform"
+  />
+
+  <span className="hidden sm:inline bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-700 bg-clip-text text-transparent">
+    {siteMeta.title}
+  </span>
+
+  <span className="sm:hidden bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-700 bg-clip-text text-transparent">
+    Tirupati Trip
+  </span>
+</Link>
+
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-1">

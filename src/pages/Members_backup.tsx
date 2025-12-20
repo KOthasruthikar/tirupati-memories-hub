@@ -761,147 +761,146 @@ const Members = () => {
               </div>
 
               {accessHistory && accessHistory.length > 0 ? (
-                <div className="space-y-4">
-                  <div className="grid gap-4">
-                    {accessHistory.slice(0, 3).map((request: any, index: number) => {
-                      const handleResendRequest = async () => {
-                        try {
-                          await resendAccessRequest.mutateAsync({
-                            requesterUid: currentUser.uid,
-                            ownerUid: request.owner_uid,
-                            requesterName: currentUser.name,
-                          });
-                          toast.success(`New request sent to ${request.owner?.name}!`);
-                        } catch (error) {
-                          toast.error("Failed to resend request");
-                        }
-                      };
 
-                      return (
-                        <motion.div
-                          key={request.id}
-                          initial={{ opacity: 0, x: -20 }}
-                          whileInView={{ opacity: 1, x: 0 }}
-                          viewport={{ once: true }}
-                          transition={{ delay: index * 0.05 }}
-                          className={`flex items-center justify-between p-4 rounded-xl border transition-all ${
-                            request.status === "approved"
-                              ? "bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800"
-                              : request.status === "denied"
-                              ? "bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-800"
-                              : "bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800"
-                          }`}
-                        >
-                          <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 rounded-full overflow-hidden bg-muted">
-                              {request.owner?.profile_image ? (
-                                <LazyImage
-                                  src={request.owner.profile_image}
-                                  alt={request.owner?.name || "User"}
-                                  className="w-full h-full"
-                                />
-                              ) : (
-                                <div className="w-full h-full flex items-center justify-center">
-                                  <User className="w-6 h-6 text-muted-foreground" />
-                                </div>
-                              )}
+                <div className="grid gap-4">
+                  {accessHistory.slice(0, 3).map((request: any, index: number) => {
+                  const handleResendRequest = async () => {
+                    try {
+                      await resendAccessRequest.mutateAsync({
+                        requesterUid: currentUser.uid,
+                        ownerUid: request.owner_uid,
+                        requesterName: currentUser.name,
+                      });
+                      toast.success(`New request sent to ${request.owner?.name}!`);
+                    } catch (error) {
+                      toast.error("Failed to resend request");
+                    }
+                  };
+
+                  return (
+                    <motion.div
+                      key={request.id}
+                      initial={{ opacity: 0, x: -20 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: index * 0.05 }}
+                      className={`flex items-center justify-between p-4 rounded-xl border transition-all ${
+                        request.status === "approved"
+                          ? "bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800"
+                          : request.status === "denied"
+                          ? "bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-800"
+                          : "bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-full overflow-hidden bg-muted">
+                          {request.owner?.profile_image ? (
+                            <LazyImage
+                              src={request.owner.profile_image}
+                              alt={request.owner?.name || "User"}
+                              className="w-full h-full"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <User className="w-6 h-6 text-muted-foreground" />
                             </div>
-                            <div>
-                              <p className="font-medium text-foreground">
-                                {request.owner?.name || "Unknown Member"}
-                              </p>
-                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                <Clock className="w-3 h-3" />
-                                <span>
-                                  {new Date(request.updated_at).toLocaleDateString()}
-                                </span>
-                              </div>
-                            </div>
+                          )}
+                        </div>
+                        <div>
+                          <p className="font-medium text-foreground">
+                            {request.owner?.name || "Unknown Member"}
+                          </p>
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <Clock className="w-3 h-3" />
+                            <span>
+                              {new Date(request.updated_at).toLocaleDateString()}
+                            </span>
                           </div>
+                        </div>
+                      </div>
 
-                          <div className="flex items-center gap-3">
-                            {/* Status Badge */}
-                            <div className="flex items-center gap-2">
-                              {request.status === "approved" && (
-                                <div className="flex items-center gap-1 px-3 py-1 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 rounded-full text-sm">
-                                  <CheckCircle className="w-4 h-4" />
-                                  <span>Approved</span>
-                                </div>
-                              )}
-                              {request.status === "denied" && (
-                                <div className="flex items-center gap-1 px-3 py-1 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 rounded-full text-sm">
-                                  <XCircle className="w-4 h-4" />
-                                  <span>Denied</span>
-                                </div>
-                              )}
-                              {request.status === "pending" && (
-                                <div className="flex items-center gap-1 px-3 py-1 bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300 rounded-full text-sm">
-                                  <Clock className="w-4 h-4" />
-                                  <span>Pending</span>
-                                </div>
-                              )}
+                      <div className="flex items-center gap-3">
+                        {/* Status Badge */}
+                        <div className="flex items-center gap-2">
+                          {request.status === "approved" && (
+                            <div className="flex items-center gap-1 px-3 py-1 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 rounded-full text-sm">
+                              <CheckCircle className="w-4 h-4" />
+                              <span>Approved</span>
                             </div>
+                          )}
+                          {request.status === "denied" && (
+                            <div className="flex items-center gap-1 px-3 py-1 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 rounded-full text-sm">
+                              <XCircle className="w-4 h-4" />
+                              <span>Denied</span>
+                            </div>
+                          )}
+                          {request.status === "pending" && (
+                            <div className="flex items-center gap-1 px-3 py-1 bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300 rounded-full text-sm">
+                              <Clock className="w-4 h-4" />
+                              <span>Pending</span>
+                            </div>
+                          )}
+                        </div>
 
-                            {/* Action Button */}
-                            {request.status === "denied" && (
-                              <Button
-                                onClick={handleResendRequest}
-                                disabled={resendAccessRequest.isPending}
-                                size="sm"
-                                variant="outline"
-                                className="gap-2 text-primary border-primary/50 hover:bg-primary/10"
-                              >
-                                <Send className="w-3 h-3" />
-                                {resendAccessRequest.isPending ? "Sending..." : "Resend"}
-                              </Button>
-                            )}
-                            
-                            {request.status === "approved" && (
-                              <Link
-                                to={`/members/${request.owner_uid}`}
-                                className="text-sm text-primary hover:underline"
-                              >
-                                View Profile →
-                              </Link>
-                            )}
-                          </div>
-                        </motion.div>
-                      );
-                    })}
+                        {/* Action Button */}
+                        {request.status === "denied" && (
+                          <Button
+                            onClick={handleResendRequest}
+                            disabled={resendAccessRequest.isPending}
+                            size="sm"
+                            variant="outline"
+                            className="gap-2 text-primary border-primary/50 hover:bg-primary/10"
+                          >
+                            <Send className="w-3 h-3" />
+                            {resendAccessRequest.isPending ? "Sending..." : "Resend"}
+                          </Button>
+                        )}
+                        
+                        {request.status === "approved" && (
+                          <Link
+                            to={`/members/${request.owner_uid}`}
+                            className="text-sm text-primary hover:underline"
+                          >
+                            View Profile →
+                          </Link>
+                        )}
+                      </div>
+                    </motion.div>
+                  );
+                })}
+                </div>
+
+                {accessHistory.length > 3 && (
+                  <div className="mt-4 text-center">
+                    <Link to="/access-history">
+                      <Button variant="ghost" className="gap-2 text-primary">
+                        <History className="w-4 h-4" />
+                        View {accessHistory.length - 3} More Requests
+                      </Button>
+                    </Link>
                   </div>
+                )}
 
-                  {accessHistory.length > 3 && (
-                    <div className="mt-4 text-center">
-                      <Link to="/access-history">
-                        <Button variant="ghost" className="gap-2 text-primary">
-                          <History className="w-4 h-4" />
-                          View {accessHistory.length - 3} More Requests
-                        </Button>
-                      </Link>
+                {/* Summary */}
+                <div className="mt-6 pt-4 border-t border-border/50">
+                  <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="w-4 h-4 text-green-500" />
+                      <span>
+                        {accessHistory.filter((r: any) => r.status === "approved").length} Approved
+                      </span>
                     </div>
-                  )}
-
-                  {/* Summary */}
-                  <div className="mt-6 pt-4 border-t border-border/50">
-                    <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-2">
-                        <CheckCircle className="w-4 h-4 text-green-500" />
-                        <span>
-                          {accessHistory.filter((r: any) => r.status === "approved").length} Approved
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Clock className="w-4 h-4 text-amber-500" />
-                        <span>
-                          {accessHistory.filter((r: any) => r.status === "pending").length} Pending
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <XCircle className="w-4 h-4 text-red-500" />
-                        <span>
-                          {accessHistory.filter((r: any) => r.status === "denied").length} Denied
-                        </span>
-                      </div>
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-4 h-4 text-amber-500" />
+                      <span>
+                        {accessHistory.filter((r: any) => r.status === "pending").length} Pending
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <XCircle className="w-4 h-4 text-red-500" />
+                      <span>
+                        {accessHistory.filter((r: any) => r.status === "denied").length} Denied
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -942,7 +941,7 @@ const Members = () => {
             </h2>
             
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed mb-8">
-              Each member brought their unique spirit to our sacred pilgrimage, creating memories that will last forever.
+              Each pilgrim brought their own unique energy, devotion, and spirit, creating an unforgettable tapestry of faith and friendship that will be cherished forever.
             </p>
             
             <div className="flex items-center justify-center gap-2 text-gold">

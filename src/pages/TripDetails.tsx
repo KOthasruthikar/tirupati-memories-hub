@@ -253,48 +253,91 @@ const TripDetails = () => {
           </div>
         </motion.div>
 
-        {/* Timeline */}
+        {/* Enhanced Timeline Section */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          className="mb-12"
-          ref={timelineRef}
+          transition={{ delay: 0.4 }}
+          className="mb-16"
         >
-          <AnimatePresence mode="wait">
-            {filteredEvents.length > 0 ? (
-              <motion.div
-                key="timeline"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-              >
-                <Timeline events={filteredEvents} onImageClick={handleImageClick} />
-              </motion.div>
-            ) : (
-              <motion.div
-                key="empty"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                className="text-center py-12 bg-card rounded-xl border border-border/50"
-              >
-                <Search className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground text-lg mb-4">
-                  No events found matching your search.
-                </p>
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setSearchQuery("");
-                    setSelectedTag("All");
-                  }}
+          <div className="flex items-center gap-4 mb-8">
+            <motion.div
+              animate={{ rotate: [0, 360] }}
+              transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+              className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-lg"
+            >
+              <Clock className="w-6 h-6 text-white" />
+            </motion.div>
+            <div>
+              <h2 className="font-heading text-3xl md:text-4xl font-semibold text-foreground">
+                Journey Timeline
+              </h2>
+              <p className="text-muted-foreground">
+                Every moment of our sacred pilgrimage
+              </p>
+            </div>
+          </div>
+
+          <div ref={timelineRef} className="relative">
+            <AnimatePresence mode="wait">
+              {filteredEvents.length > 0 ? (
+                <motion.div
+                  key="timeline"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="relative"
                 >
-                  Clear Filters
-                </Button>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                  {/* Timeline Background Pattern */}
+                  <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                    <div className="absolute top-0 left-1/4 w-64 h-64 bg-gold/5 rounded-full blur-3xl" />
+                    <div className="absolute bottom-0 right-1/4 w-48 h-48 bg-saffron/5 rounded-full blur-2xl" />
+                  </div>
+                  
+                  <Timeline events={filteredEvents} onImageClick={handleImageClick} />
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="empty"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  className="text-center py-20 bg-card/50 backdrop-blur-sm rounded-2xl border border-border/50 relative overflow-hidden"
+                >
+                  {/* Empty State Background */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent" />
+                  
+                  <div className="relative z-10">
+                    <motion.div
+                      animate={{ scale: [1, 1.1, 1] }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                      className="w-20 h-20 mx-auto mb-6 rounded-full bg-muted/50 flex items-center justify-center"
+                    >
+                      <Search className="w-10 h-10 text-muted-foreground" />
+                    </motion.div>
+                    
+                    <h3 className="font-heading text-2xl font-semibold text-foreground mb-4">
+                      No Events Found
+                    </h3>
+                    
+                    <p className="text-muted-foreground text-lg mb-8 max-w-md mx-auto">
+                      We couldn't find any events matching your current search criteria.
+                    </p>
+                    
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setSearchQuery("");
+                        setSelectedTag("All");
+                      }}
+                    >
+                      Clear Filters
+                    </Button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </motion.div>
 
         {/* Map Section */}

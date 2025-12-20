@@ -41,10 +41,10 @@ export interface GalleryImage {
 // SITE METADATA - Edit these values
 // ============================================
 export const siteMeta: SiteMeta = {
-  title: "My Tirupati Trip",
+  title: " Tirupati Trip",
   tagline: "A Sacred Journey of Faith & Devotion",
   // REPLACE: Add your hero image URL here
-  heroImage: "https://images.unsplash.com/photo-1621427638054-4f165f9a8f8f?w=1920&q=80",
+  heroImage: "https://image2url.com/images/1766064702004-44c6eba2-ad48-45e2-aa51-767962e704da.jpg",
   heroDescription: "Cherishing the divine moments spent at the holy abode of Lord Venkateswara. This trip was filled with spirituality, togetherness, and memories that will last a lifetime.",
 };
 
@@ -66,86 +66,122 @@ export const highlights: string[] = [
 export const timelineEvents: TimelineEvent[] = [
   {
     id: "1",
-    time: "Day 1 - Early Morning",
-    title: "Departure from Home",
-    description: "Started our sacred journey early morning with prayers and excitement. The anticipation of visiting Lord Venkateswara filled everyone with joy. We carried prasadam packets and necessary items for the darshan.",
-    tags: ["Travel", "Start"],
-    // REPLACE: Add your actual travel photos
+    time: "Day 1 – 03 December 2025, 09:45 PM",
+    title: "Journey Begins from Charlapalli",
+    description:
+      "Our spiritual journey began from Charlapalli as all eight of us boarded the Tirupathy Special train (07001). The excitement was high, and we spent the journey joyfully by playing hide and seek, making the train ride memorable from the very start.",
+    tags: ["Travel", "Train", "Start"],
     images: [
       "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=800&q=80",
       "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=800&q=80",
     ],
   },
+
   {
     id: "2",
-    time: "Day 1 - Afternoon",
+    time: "Day 2 – 04 December 2025, 01:00 AM",
     title: "Arrival at Tirupati",
-    description: "Reached Tirupati after a scenic drive through the Eastern Ghats. Checked into our accommodation near the temple complex. The town was buzzing with devotees from all over the country.",
-    tags: ["Travel", "Accommodation"],
+    description:
+      "We reached Tirupati early in the morning at 1:00 AM. After arriving, we prepared ourselves for the next steps of the pilgrimage and planned our darshan and trekking schedule.",
+    tags: ["Arrival", "Travel"],
     images: [
       "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80",
     ],
   },
+
   {
     id: "3",
-    time: "Day 1 - Evening",
-    title: "Visit to Padmavathi Temple",
-    description: "Visited the sacred Padmavathi Temple at Tiruchanoor. The evening aarti was mesmerizing. Offered prayers to Goddess Padmavathi, the divine consort of Lord Venkateswara.",
-    tags: ["Darshan", "Temple"],
+    time: "Day 2 – 04 December 2025, 03:30 PM",
+    title: "SSD Darshan Tickets at Vishnu Vilas",
+    description:
+      "We went to Vishnu Vilas to obtain SSD darshan tickets. After successfully getting the tickets, we had a simple meal of curd rice, which refreshed us after the long journey.",
+    tags: ["Darshan", "Food"],
     images: [
-      "https://images.unsplash.com/photo-1548013146-72479768bada?w=800&q=80",
       "https://images.unsplash.com/photo-1609766857041-ed402ea8069a?w=800&q=80",
     ],
   },
+
   {
     id: "4",
-    time: "Day 2 - Dawn",
-    title: "Trek to Tirumala",
-    description: "Embarked on the sacred trek up the seven hills. The 11km path through lush greenery was spiritually uplifting. Fellow devotees chanting 'Govinda Govinda' created an electrifying atmosphere.",
+    time: "Day 2 – 04 December 2025, 06:45 PM",
+    title: "Alipiri Steps Climb",
+    description:
+      "We started climbing the Alipiri steps at 6:45 PM. Until the 2100th step, the path was completely sloped, and after that, there were long flat steps that allowed us to walk comfortably while enjoying the spiritual atmosphere.",
     tags: ["Trek", "Spiritual"],
     images: [
       "https://images.unsplash.com/photo-1551632811-561732d1e306?w=800&q=80",
       "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800&q=80",
     ],
   },
+
   {
     id: "5",
-    time: "Day 2 - Morning",
-    title: "Divine Darshan",
-    description: "The most awaited moment - standing before Lord Venkateswara. The golden vimanam, the divine fragrance, and the powerful presence of the Lord left us speechless. A truly life-changing experience.",
-    tags: ["Darshan", "Spiritual", "Highlight"],
+    time: "Day 2 – Night",
+    title: "Reached Tirumala & Luggage Collection",
+    description:
+      "After completing the Alipiri steps and reaching Tirumala, we collected our luggage from the luggage service center using the unique ID provided earlier. We then went to the CRO office for room booking, but it was closed, so we booked lockers at Venkatadri Nilayam, had food, purchased panchas, and rested for the night.",
+    tags: ["Arrival", "Luggage", "Rest"],
     images: [
-      "https://images.unsplash.com/photo-1609766857041-ed402ea8069a?w=800&q=80",
       "https://images.unsplash.com/photo-1548013146-72479768bada?w=800&q=80",
-      "https://images.unsplash.com/photo-1604537466158-719b1972feb8?w=800&q=80",
     ],
   },
+
   {
     id: "6",
-    time: "Day 2 - Afternoon",
-    title: "Temple Prasadam",
-    description: "Relished the famous Tirupati laddu and Anna prasadam. The simplicity and taste of the temple food was divine. Shared meals with fellow devotees in the community dining hall.",
-    tags: ["Food", "Prasadam"],
+    time: "Day 3 – 05 December 2025, 07:00 AM",
+    title: "SSD Queue & Divine Darshan",
+    description:
+      "We woke up early at 5:00 AM, took bath, and wore traditional pancha and shirt for darshan. After reaching the SSD queue area, the line started at 7:00 AM. We entered the line quickly and after waiting for nearly 4 hours and 30 minutes, we finally had the blessed darshan of Lord Venkateswara.",
+    tags: ["Darshan", "Highlight", "Spiritual"],
+    images: [
+      "https://images.unsplash.com/photo-1604537466158-719b1972feb8?w=800&q=80",
+      "https://images.unsplash.com/photo-1609766857041-ed402ea8069a?w=800&q=80",
+    ],
+  },
+
+  {
+    id: "7",
+    time: "Day 3 – 05 December 2025, Afternoon",
+    title: "Temple Photos, Lunch & Laddus",
+    description:
+      "After darshan, we took photos inside the temple premises and had lunch at Vengamamba Anna Prasadam Hall. Later, we purchased the famous Tirupati laddus, booked a room for ₹1000, shifted our luggage to the room, and went shopping at night.",
+    tags: ["Food", "Prasadam", "Shopping"],
     images: [
       "https://images.unsplash.com/photo-1567337710282-00832b415979?w=800&q=80",
     ],
   },
-  {
-    id: "7",
-    time: "Day 3 - Morning",
-    title: "Local Sightseeing",
-    description: "Explored the beautiful Akasa Ganga waterfalls and the serene Silathoranam rock formation. Nature's beauty combined with spiritual significance made it unforgettable.",
-    tags: ["Sightseeing", "Nature"],
-    images: [
-      "https://images.unsplash.com/photo-1432405972618-c60b0225b8f9?w=800&q=80",
-      "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80",
-    ],
-  },
+
   {
     id: "8",
-    time: "Day 3 - Evening",
-    title: "Return Journey",
-    description: "With hearts full of devotion and bags full of prasadam, we began our journey home. The memories of this sacred trip will forever remain etched in our hearts.",
+    time: "Day 4 – 06 December 2025, 06:00 AM",
+    title: "Varaha Swamy Darshan",
+    description:
+      "Early in the morning at 6:00 AM, we visited the sacred Varaha Swamy Temple and had a peaceful darshan, which marked a beautiful spiritual beginning to the day.",
+    tags: ["Temple", "Darshan", "Spiritual"],
+    images: [
+      "https://images.unsplash.com/photo-1432405972618-c60b0225b8f9?w=800&q=80",
+    ],
+  },
+
+  {
+    id: "9",
+    time: "Day 4 – Morning to Afternoon",
+    title: "Visit to the 7 Sacred Places on Seventh Hill",
+    description:
+      "After Varaha Swamy darshan, we booked a traveller for ₹1800 and visited all the seven sacred places located on the seventh hill of Tirumala, completing our spiritual sightseeing.",
+    tags: ["Srivari Padalu","Japali Anjaneya Swamy Temple","Akasha Ganga","Papavinashanam","Silathoranam","VenuGopala Swamy Temple","Chakratheertham"],
+    images: [
+      "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80",
+      "https://images.unsplash.com/photo-1432405972618-c60b0225b8f9?w=800&q=80",
+    ],
+  },
+
+  {
+    id: "10",
+    time: "Day 4 – Evening",
+    title: "Return Journey to Vijayawada",
+    description:
+      "With hearts filled with devotion and unforgettable memories, we went to the railway station and returned to Vijayawada, bringing our Tirumala journey to a peaceful conclusion.",
     tags: ["Travel", "End"],
     images: [
       "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=800&q=80",
@@ -320,65 +356,125 @@ export interface RouteStop {
 }
 
 export const mapConfig = {
-  embedUrl: "https://www.google.com/maps/embed?pb=!1m46!1m12!1m3!1d497698.7731259!2d79.29370047421875!3d13.5551!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!4m31!3e0!4m5!1s0x3a4d4b0fef456031%3A0xab862ac823e8c407!2sChennai%2C%20Tamil%20Nadu!3m2!1d13.0826802!2d80.2707184!4m5!1s0x3bb55bba8d40c433%3A0x7b0681c2d5db4f7c!2sTiruchanoor%2C%20Andhra%20Pradesh!3m2!1d13.4607!2d79.4194!4m5!1s0x3bb55a6c1e51b3ef%3A0x2f56f7743b2c2a69!2sTirupati%2C%20Andhra%20Pradesh!3m2!1d13.6288!2d79.4192!4m5!1s0x3bb4a28d70e25009%3A0x4e4d4a9fdee0adf3!2sTirumala%2C%20Tirupati%2C%20Andhra%20Pradesh!3m2!1d13.6833!2d79.3500!4m5!1s0x3a4d4b0fef456031%3A0xab862ac823e8c407!2sChennai%2C%20Tamil%20Nadu!3m2!1d13.0826802!2d80.2707184!5e0!3m2!1sen!2sin!4v1699999999999!5m2!1sen!2sin",
-  title: "Our Journey Route",
-  description: "The sacred path from Chennai to Tirumala and back",
-  totalDistance: "280 km",
-  totalDuration: "3 Days",
+  embedUrl: "https://www.google.com/maps/embed?pb=!1m52!1m12!1m3!1d497698.77314518!2d78.48370047421875!3d15.3851!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!4m37!3e0!4m5!1s0x3bcb99daeaebd2c7%3A0xae93b78392bafbc2!2sCharlapally%2C%20Hyderabad%2C%20Telangana!3m2!1d17.2403!2d78.6677!4m5!1s0x3bb55a6c1e51b3ef%3A0x2f56f7743b2c2a69!2sTirupati%2C%20Andhra%20Pradesh!3m2!1d13.6288!2d79.4192!4m5!1s0x3bb4a28d70e25009%3A0x4e4d4a9fdee0adf3!2sTirumala%2C%20Andhra%20Pradesh!3m2!1d13.6833!2d79.3500!4m5!1s0x3a35f0a29c8b2ca5%3A0x2b1e8b9c8d7e6f5a!2sVijayawada%2C%20Andhra%20Pradesh!3m2!1d16.5062!2d80.6480!4m5!1s0x3bcb99daeaebd2c7%3A0xae93b78392bafbc2!2sLB%20Nagar%2C%20Hyderabad%2C%20Telangana!3m2!1d17.3616!2d78.5506!4m5!1s0x3bcb91f2a7c8d9e1%3A0x3e7d9f0e2b3c4d5e!2sMaisamma%20Guda%2C%20Hyderabad%2C%20Telangana!3m2!1d17.4500!2d78.3900!5e0!3m2!1sen!2sin!4v1699999999999!5m2!1sen!2sin",
+  title: "Our Sacred Pilgrimage Route",
+  description: "Complete journey from Hyderabad to Tirumala and back with all sacred stops",
+  totalDistance: "1,423 km",
+  totalDuration: "5 Days",
 };
 
 export const routeStops: RouteStop[] = [
   {
-    name: "Chennai",
-    description: "Starting point - Home city",
+    name: "Charlapally, Hyderabad",
+    description: "Journey begins - Departure point from Hyderabad",
     day: "Day 1",
     icon: "🏠",
   },
   {
-    name: "Tiruchanoor",
-    description: "Padmavathi Temple - Evening Darshan",
-    day: "Day 1",
-    icon: "🛕",
-  },
-  {
     name: "Tirupati",
-    description: "Overnight stay & preparations",
+    description: "Arrival at the holy city - Base for our pilgrimage",
     day: "Day 1",
-    icon: "🏨",
+    icon: "�",
   },
   {
-    name: "Tirumala (Trek)",
-    description: "Sacred trek through seven hills",
+    name: "Vishnu Vilas, Tirupati",
+    description: "SSD Darshan ticket booking and curd rice meal",
+    day: "Day 2",
+    icon: "�",
+  },
+  {
+    name: "Alipiri, Tirupati",
+    description: "Starting point of the sacred trek to Tirumala",
+    day: "Day 2",
+    icon: "🥾",
+  },
+  {
+    name: "Tirumala",
+    description: "Reached the sacred seven hills - Lord Venkateswara's abode",
     day: "Day 2",
     icon: "⛰️",
   },
   {
-    name: "Sri Venkateswara Temple",
-    description: "Divine Darshan - Main destination",
+    name: "CRO Office, Tirumala",
+    description: "Central Reception Office - Accommodation arrangements",
     day: "Day 2",
-    icon: "🙏",
+    icon: "🏢",
   },
   {
-    name: "Akasa Ganga",
-    description: "Holy waterfall visit",
+    name: "Vengamamba Temple, Tirumala",
+    description: "Visit to the sacred Vengamamba Mata temple",
     day: "Day 3",
+    icon: "🛕",
+  },
+  {
+    name: "Srivari Padalu, Tirumala",
+    description: "Sacred footprints of Lord Venkateswara",
+    day: "Day 3",
+    icon: "👣",
+  },
+  {
+    name: "Silathoranam, Tirumala",
+    description: "Natural rock formation - Divine architectural wonder",
+    day: "Day 3",
+    icon: "🪨",
+  },
+  {
+    name: "Japali Hanuman Temple, Tirumala",
+    description: "Ancient Hanuman temple with spiritual significance",
+    day: "Day 3",
+    icon: "🐒",
+  },
+  {
+    name: "Venugopala Swamy Temple, Tirumala",
+    description: "Beautiful Krishna temple with serene atmosphere",
+    day: "Day 3",
+    icon: "🎵",
+  },
+  {
+    name: "Papavinashanam, Tirumala",
+    description: "Sacred waterfall for cleansing sins",
+    day: "Day 4",
     icon: "💧",
   },
   {
-    name: "Chennai",
-    description: "Return journey home",
-    day: "Day 3",
-    icon: "🏠",
+    name: "Akashaganga, Tirumala",
+    description: "Holy waterfall - Final sacred stop in Tirumala",
+    day: "Day 4",
+    icon: "🌊",
+  },
+  {
+    name: "Vijayawada",
+    description: "Transit stop on return journey",
+    day: "Day 4",
+    icon: "🚌",
+  },
+  {
+    name: "LB Nagar, Hyderabad",
+    description: "Approaching home - Return to Hyderabad",
+    day: "Day 5",
+    icon: "🏙️",
+  },
+  {
+    name: "Secunderabad",
+    description: "Railway junction - Final transit point",
+    day: "Day 5",
+    icon: "🚉",
+  },
+  {
+    name: "Maisammaguda, Hyderabad",
+    description: "Journey ends - Safe return home with blessed memories",
+    day: "Day 5",
+    icon: "🏡",
   },
 ];
 
 // Trip statistics
 export const tripStats = {
   totalMembers: 8,
-  totalPhotos: 150,
-  daysOfJourney: 3,
-  templeVisits: 4,
-  totalDistance: "280 km",
+  totalPhotos: 1000,
+  daysOfJourney: 5,
+  templeVisits: 15,
+  totalDistance: "1423 km",
 };
 
 // ============================================

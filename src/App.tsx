@@ -16,6 +16,8 @@ import Login from "./pages/Login";
 import ForgotPassword from "./pages/ForgotPassword";
 import Profile from "./pages/Profile";
 import UploadImage from "./pages/UploadImage";
+import Blessings from "./pages/Blessings";
+import AccessHistory from "./pages/AccessHistory";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -41,6 +43,8 @@ const App = () => (
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/upload" element={<UploadImage />} />
+                <Route path="/blessings" element={<Blessings />} />
+                <Route path="/access-history" element={<AccessHistory />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </main>

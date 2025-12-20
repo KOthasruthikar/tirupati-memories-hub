@@ -181,3 +181,107 @@ export const useDeleteAccessRequest = () => {
     },
   });
 };
+
+// Resend access request (for denied requests)
+export const useResendAccessRequest = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      requesterUid,
+      ownerUid,
+      requesterName,
+    }: {
+      requesterUid: string;
+      ownerUid: string;
+      requesterName: string;
+    }) => {
+      // First, update the existing denied request to pending
+      const { data: existingRequest, error: fetchError } = await supabase
+        .from("access_requests")
+        .select("id")
+        .eq("requester_uid", requesterUid)
+        .eq("owner_uid", ownerUid)
+        .eq("status", "denied")
+        .single();
+
+      if (fetchError && fetchError.code !== "PGRST116") throw fetchError;
+
+      if (existingRequest) {
+        // Update existing denied request to pending
+        const { data, error } = await supabase
+          .from("access_requests")
+          .update({ 
+            status: "pending",
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", existingRequest.id)
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        // Send email notification (non-blocking)
+        supabase.functions.invoke("send-access-notification", {
+          body: { 
+            requesterUid, 
+            ownerUid, 
+            requesterName,
+            isResend: true,
+          },
+        }).catch((err) => console.error("Failed to send notification:", err));
+
+        return data;
+      } else {
+        // Create new request if no denied request exists
+        const { data, error } = await supabase
+          .from("access_requests")
+          .insert({
+            requester_uid: requesterUid,
+            owner_uid: ownerUid,
+            status: "pending",
+          })
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        // Send email notification (non-blocking)
+        supabase.functions.invoke("send-access-notification", {
+          body: { requesterUid, ownerUid, requesterName },
+        }).catch((err) => console.error("Failed to send notification:", err));
+
+        return data;
+      }
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["access-request-status", variables.requesterUid, variables.ownerUid],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["access-requests-outgoing", variables.requesterUid],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["access-requests-incoming", variables.ownerUid],
+      });
+    },
+  });
+};
+
+// Get access request history for a user (all requests they've made)
+export const useAccessRequestHistory = (requesterUid: string) => {
+  return useQuery({
+    queryKey: ["access-request-history", requesterUid],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("access_requests")
+        .select("*, owner:members!access_requests_owner_uid_fkey(uid, name, profile_image)")
+        .eq("requester_uid", requesterUid)
+        .order("updated_at", { ascending: false });
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!requesterUid,
+  });
+};
