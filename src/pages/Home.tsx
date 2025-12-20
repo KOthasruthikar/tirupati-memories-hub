@@ -1,20 +1,22 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowRight, Camera, MapPin, Users, Calendar, Mountain, Heart, Sparkles, Play, Map } from "lucide-react";
+import { ArrowRight, Camera, MapPin, Users, Calendar, Mountain, Heart, Sparkles, Play, Map, Loader2 } from "lucide-react";
 import { siteMeta, highlights, tripStats } from "@/data/seed";
 import { useHomeMembers, useHomeGallery, useGalleryCount, useMembersCount } from "@/hooks/useHomeData";
 import { Button } from "@/components/ui/button";
 import LazyImage from "@/components/LazyImage";
 import Lightbox from "@/components/Lightbox";
 import PhotoCarousel from "@/components/PhotoCarousel";
+import LoadingState from "@/components/LoadingState";
+import ErrorState from "@/components/ErrorState";
 
 const Home = () => {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   
-  const { data: featuredMembers = [] } = useHomeMembers(4);
-  const { data: quickPhotos = [] } = useHomeGallery(4);
+  const { data: featuredMembers = [], isLoading: membersLoading, isError: membersError, refetch: refetchMembers } = useHomeMembers(4);
+  const { data: quickPhotos = [], isLoading: photosLoading, isError: photosError, refetch: refetchPhotos } = useHomeGallery(4);
   const { data: totalPhotos = 0 } = useGalleryCount();
   const { data: totalMembers = 0 } = useMembersCount();
   
@@ -591,30 +593,38 @@ const Home = () => {
             <p className="text-muted-foreground">The wonderful people who made this journey special</p>
           </motion.div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
-            {featuredMembers.map((member, index) => (
-              <motion.div
-                key={member.uid}
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="text-center group"
-              >
-                <Link to={`/members/${member.uid}`}>
-                  <div className="relative w-24 h-24 md:w-32 md:h-32 mx-auto mb-4 rounded-full overflow-hidden ring-4 ring-primary/10 group-hover:ring-primary/30 transition-all duration-300">
-                    <LazyImage
-                      src={member.profile_image}
-                      alt={member.name}
-                      className="w-full h-full transition-transform duration-500 group-hover:scale-110"
-                    />
-                  </div>
-                  <h3 className="font-heading font-semibold text-foreground group-hover:text-primary transition-colors">{member.name}</h3>
-                  <p className="text-sm text-muted-foreground">{member.role}</p>
-                </Link>
-              </motion.div>
-            ))}
-          </div>
+          {membersLoading ? (
+            <LoadingState message="Loading members..." size="md" />
+          ) : membersError ? (
+            <ErrorState message="Failed to load members" onRetry={() => refetchMembers()} />
+          ) : featuredMembers.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">No members found</div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
+              {featuredMembers.map((member, index) => (
+                <motion.div
+                  key={member.uid}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                  className="text-center group"
+                >
+                  <Link to={`/members/${member.uid}`}>
+                    <div className="relative w-24 h-24 md:w-32 md:h-32 mx-auto mb-4 rounded-full overflow-hidden ring-4 ring-primary/10 group-hover:ring-primary/30 transition-all duration-300">
+                      <LazyImage
+                        src={member.profile_image}
+                        alt={member.name}
+                        className="w-full h-full transition-transform duration-500 group-hover:scale-110"
+                      />
+                    </div>
+                    <h3 className="font-heading font-semibold text-foreground group-hover:text-primary transition-colors">{member.name}</h3>
+                    <p className="text-sm text-muted-foreground">{member.role}</p>
+                  </Link>
+                </motion.div>
+              ))}
+            </div>
+          )}
 
           <motion.div
             initial={{ opacity: 0 }}
@@ -675,21 +685,27 @@ const Home = () => {
       </section>
 
       {/* Quick Photos Grid */}
-      {quickPhotos.length > 0 && (
-        <section className="py-16 md:py-24">
-          <div className="container px-4">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="text-center mb-12"
-            >
-              <h2 className="font-heading text-3xl md:text-4xl font-semibold text-foreground mb-4">
-                Quick Glimpse
-              </h2>
-              <p className="text-muted-foreground">A preview of our cherished memories</p>
-            </motion.div>
+      <section className="py-16 md:py-24">
+        <div className="container px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-12"
+          >
+            <h2 className="font-heading text-3xl md:text-4xl font-semibold text-foreground mb-4">
+              Quick Glimpse
+            </h2>
+            <p className="text-muted-foreground">A preview of our cherished memories</p>
+          </motion.div>
 
+          {photosLoading ? (
+            <LoadingState message="Loading photos..." size="md" />
+          ) : photosError ? (
+            <ErrorState message="Failed to load photos" onRetry={() => refetchPhotos()} />
+          ) : quickPhotos.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">No photos yet. Be the first to upload!</div>
+          ) : (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-5xl mx-auto">
               {quickPhotos.map((photo, index) => (
                 <motion.button
@@ -710,22 +726,22 @@ const Home = () => {
                 </motion.button>
               ))}
             </div>
+          )}
 
-            <motion.div
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              className="text-center mt-8"
-            >
-              <Button asChild variant="outline" size="lg">
-                <Link to="/gallery">
-                  View Full Gallery <ArrowRight className="ml-2 w-5 h-5" />
-                </Link>
-              </Button>
-            </motion.div>
-          </div>
-        </section>
-      )}
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            className="text-center mt-8"
+          >
+            <Button asChild variant="outline" size="lg">
+              <Link to="/gallery">
+                View Full Gallery <ArrowRight className="ml-2 w-5 h-5" />
+              </Link>
+            </Button>
+          </motion.div>
+        </div>
+      </section>
 
       {/* Enhanced Navigation Cards */}
       <section className="py-20 md:py-28 bg-gradient-to-b from-muted/30 to-background relative overflow-hidden">
