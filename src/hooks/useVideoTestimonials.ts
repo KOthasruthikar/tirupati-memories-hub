@@ -53,11 +53,13 @@ export const useUploadVideo = () => {
       ownerUid,
       title,
       description,
+      durationSeconds,
     }: {
       file: File;
       ownerUid: string;
       title?: string;
       description?: string;
+      durationSeconds?: number;
     }) => {
       // Validate member exists
       const { data: member, error: memberError } = await supabase
@@ -95,6 +97,7 @@ export const useUploadVideo = () => {
           title: title || null,
           description: description || null,
           file_size_bytes: file.size,
+          duration_seconds: durationSeconds || null,
         })
         .select()
         .single();

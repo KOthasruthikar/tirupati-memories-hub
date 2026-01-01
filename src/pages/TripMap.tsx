@@ -4,7 +4,7 @@ import { MapPin, Train, Navigation, Clock, Route, Play, Pause, Sparkles, Calenda
 import { mapConfig, routeStops } from "@/data/seed";
 import { Button } from "@/components/ui/button";
 
-const TripMap = () => {
+const TripMap: React.FC = () => {
   const [isAutoPlaying, setIsAutoPlaying] = useState(false);
   const [selectedStop, setSelectedStop] = useState<number | null>(null);
   const [currentAutoStop, setCurrentAutoStop] = useState(0);
