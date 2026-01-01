@@ -1,9 +1,10 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { queryClient } from "@/lib/queryClient";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import Home from "./pages/Home";
@@ -18,9 +19,8 @@ import Profile from "./pages/Profile";
 import UploadImage from "./pages/UploadImage";
 import Blessings from "./pages/Blessings";
 import AccessHistory from "./pages/AccessHistory";
+import VideoTestimonials from "./pages/VideoTestimonials";
 import NotFound from "./pages/NotFound";
-
-const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -45,6 +45,7 @@ const App = () => (
                 <Route path="/upload" element={<UploadImage />} />
                 <Route path="/blessings" element={<Blessings />} />
                 <Route path="/access-history" element={<AccessHistory />} />
+                <Route path="/testimonials" element={<VideoTestimonials />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </main>

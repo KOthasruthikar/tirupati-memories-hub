@@ -169,6 +169,39 @@ export type Database = {
         }
         Relationships: []
       }
+      video_testimonials: {
+        Row: {
+          description: string | null
+          duration_seconds: number | null
+          file_size_bytes: number | null
+          id: string
+          owner_uid: string
+          title: string | null
+          uploaded_at: string
+          video_url: string
+        }
+        Insert: {
+          description?: string | null
+          duration_seconds?: number | null
+          file_size_bytes?: number | null
+          id?: string
+          owner_uid: string
+          title?: string | null
+          uploaded_at?: string
+          video_url: string
+        }
+        Update: {
+          description?: string | null
+          duration_seconds?: number | null
+          file_size_bytes?: number | null
+          id?: string
+          owner_uid?: string
+          title?: string | null
+          uploaded_at?: string
+          video_url?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
