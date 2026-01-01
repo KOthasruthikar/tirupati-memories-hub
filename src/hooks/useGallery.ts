@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { DbGalleryImage } from "@/types/database";
 
-export const useGallery = () => {
+export const useGallery = (enabled: boolean = true) => {
   return useQuery({
     queryKey: ["gallery"],
     queryFn: async () => {
@@ -14,6 +14,7 @@ export const useGallery = () => {
       if (error) throw error;
       return data as (DbGalleryImage & { members: { name: string } | null })[];
     },
+    enabled,
   });
 };
 

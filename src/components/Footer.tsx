@@ -1,4 +1,4 @@
-import { Heart, MapPin, Camera, Users, Calendar, Sparkles, Mail, Phone, Instagram, Facebook, Twitter } from "lucide-react";
+import { Heart, MapPin, Camera, Users, Calendar, Sparkles, Mail, Phone, Instagram, Facebook, MessageCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { siteMeta } from "@/data/seed";
@@ -18,7 +18,16 @@ const Footer = () => {
   const socialLinks = [
     { icon: Instagram, label: "Instagram", href: "#" },
     { icon: Facebook, label: "Facebook", href: "#" },
-    { icon: Twitter, label: "Twitter", href: "#" },
+    { 
+      icon: MessageCircle, 
+      label: "WhatsApp Group", 
+      href: "https://chat.whatsapp.com/invite/tirupati-pilgrims-group",
+      onClick: () => {
+        const message = encodeURIComponent("🙏 Namaste! I would like to join the Tirupati Pilgrims WhatsApp group to connect with fellow devotees and share our sacred journey experiences.");
+        const whatsappUrl = `https://wa.me/?text=${message}`;
+        window.open(whatsappUrl, '_blank');
+      }
+    },
   ];
 
   const containerVariants = {
@@ -540,10 +549,14 @@ const Footer = () => {
                 <p className="text-sm text-muted-foreground mb-3">Follow our journey</p>
                 <div className="flex items-center gap-3">
                   {socialLinks.map((social, index) => (
-                    <motion.a
+                    <motion.button
                       key={social.label}
-                      href={social.href}
-                      className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary hover:bg-primary hover:text-primary-foreground transition-colors"
+                      onClick={social.onClick || (() => window.open(social.href, '_blank'))}
+                      className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
+                        social.label === "WhatsApp Group" 
+                          ? "bg-green-500/10 text-green-600 hover:bg-green-500 hover:text-white" 
+                          : "bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground"
+                      }`}
                       whileHover={{ scale: 1.1, rotate: 5 }}
                       whileTap={{ scale: 0.95 }}
                       initial={{ opacity: 0, scale: 0 }}
@@ -551,9 +564,10 @@ const Footer = () => {
                       viewport={{ once: true }}
                       transition={{ delay: index * 0.1 }}
                       aria-label={social.label}
+                      title={social.label === "WhatsApp Group" ? "Join our Tirupati Pilgrims WhatsApp Group" : social.label}
                     >
                       <social.icon className="w-5 h-5" />
-                    </motion.a>
+                    </motion.button>
                   ))}
                 </div>
               </div>

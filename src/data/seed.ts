@@ -72,8 +72,8 @@ export const timelineEvents: TimelineEvent[] = [
       "Our spiritual journey began from Charlapalli as all eight of us boarded the Tirupathy Special train (07001). The excitement was high, and we spent the journey joyfully by playing hide and seek, making the train ride memorable from the very start.",
     tags: ["Travel", "Train", "Start"],
     images: [
-      "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=800&q=80",
-      "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=800&q=80",
+      "https://image2url.com/images/1766462172674-6f701d19-8a8e-41a4-b005-14708aeaff65.webp",
+      "https://image2url.com/images/1766462215329-a83593a8-cd38-4d33-ab74-fcdf9a298f0a.jpg",
     ],
   },
 
@@ -85,7 +85,7 @@ export const timelineEvents: TimelineEvent[] = [
       "We reached Tirupati early in the morning at 1:00 AM. After arriving, we prepared ourselves for the next steps of the pilgrimage and planned our darshan and trekking schedule.",
     tags: ["Arrival", "Travel"],
     images: [
-      "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80",
+      "https://image2url.com/images/1766462289930-24ecedeb-0aaa-408a-945e-e8427a797bb6.jpg",
     ],
   },
 
@@ -97,7 +97,7 @@ export const timelineEvents: TimelineEvent[] = [
       "We went to Vishnu Vilas to obtain SSD darshan tickets. After successfully getting the tickets, we had a simple meal of curd rice, which refreshed us after the long journey.",
     tags: ["Darshan", "Food"],
     images: [
-      "https://images.unsplash.com/photo-1609766857041-ed402ea8069a?w=800&q=80",
+      "https://image2url.com/images/1766462417396-aec4f3cc-94b9-4955-a0cb-f1a8abcd0573.jpg",
     ],
   },
 
@@ -109,8 +109,11 @@ export const timelineEvents: TimelineEvent[] = [
       "We started climbing the Alipiri steps at 6:45 PM. Until the 2100th step, the path was completely sloped, and after that, there were long flat steps that allowed us to walk comfortably while enjoying the spiritual atmosphere.",
     tags: ["Trek", "Spiritual"],
     images: [
-      "https://images.unsplash.com/photo-1551632811-561732d1e306?w=800&q=80",
-      "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800&q=80",
+      "https://image2url.com/images/1766462498795-e239a44d-7622-4751-bfb0-da5fbb0adedf.jpg",
+      "https://image2url.com/images/1766462553549-c96bda38-b78f-4921-a64f-bae02ccd62b9.jpg",
+      "https://image2url.com/images/1766462602644-fc0dfd88-e866-4dc3-b9e1-89bc58a90924.jpg",
+      "https://image2url.com/images/1766462742124-c8c34b90-d41f-46d4-b4b4-3e881dd91f01.jpg",
+      "https://image2url.com/images/1766462807120-c09090f1-b7f1-485c-a1a1-af10f26e11b6.jpg",
     ],
   },
 
@@ -122,7 +125,8 @@ export const timelineEvents: TimelineEvent[] = [
       "After completing the Alipiri steps and reaching Tirumala, we collected our luggage from the luggage service center using the unique ID provided earlier. We then went to the CRO office for room booking, but it was closed, so we booked lockers at Venkatadri Nilayam, had food, purchased panchas, and rested for the night.",
     tags: ["Arrival", "Luggage", "Rest"],
     images: [
-      "https://images.unsplash.com/photo-1548013146-72479768bada?w=800&q=80",
+      "https://image2url.com/images/1766462897181-4bb2ba8f-fe0f-4d81-869e-148532abc372.jpg",
+      "https://image2url.com/images/1766462954153-0879fc8c-0f50-4a33-8eea-c2c303bc0b1e.jpg",
     ],
   },
 
@@ -134,8 +138,10 @@ export const timelineEvents: TimelineEvent[] = [
       "We woke up early at 5:00 AM, took bath, and wore traditional pancha and shirt for darshan. After reaching the SSD queue area, the line started at 7:00 AM. We entered the line quickly and after waiting for nearly 4 hours and 30 minutes, we finally had the blessed darshan of Lord Venkateswara.",
     tags: ["Darshan", "Highlight", "Spiritual"],
     images: [
-      "https://images.unsplash.com/photo-1604537466158-719b1972feb8?w=800&q=80",
-      "https://images.unsplash.com/photo-1609766857041-ed402ea8069a?w=800&q=80",
+      "https://i.ytimg.com/vi/mzQW7mPezog/maxresdefault.jpg?sqp=-oaymwEoCIAKENAF8quKqQMcGADwAQH4Ac4FgAKACooCDAgAEAEYZSBYKD4wDw==&rs=AOn4CLCBqZ13F8Bvx1cLOu4mEP98voMMwg",
+      "https://image2url.com/images/1766463069408-033e4deb-bb2b-47f6-a59f-6cf91eac54f4.webp",
+      "https://image2url.com/images/1766463139845-dd71ad74-4856-4a61-855b-ffe8d4382e58.jpg",
+      "https://image2url.com/images/1766463175666-3ecafd1f-d6fc-40ca-a9e8-93f1f95f0dfa.jpg",
     ],
   },
 

@@ -30,11 +30,12 @@ const lightRayPositions = [
 ];
 
 const mantras = [
-  "ॐ नमो वेङ्कटेशाय",
-  "श्री वेंकटेश्वर स्वामी",
-  "गोविंदा गोविंदा",
-  "ॐ नमो नारायणाय",
+  "ఓం నమో వెంకటేశాయ",
+  "శ్రీ వేంకటేశ్వర స్వామి",
+  "గోవిందా గోవిందా",
+  "ఓం నమో నారాయణాయ",
 ];
+
 
 const Blessings = () => {
   const [isPlaying, setIsPlaying] = useState(false);
