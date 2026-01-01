@@ -11,6 +11,7 @@ const navLinks = [
   { path: "/map", label: "Trip Map" },
   { path: "/gallery", label: "Gallery" },
   { path: "/members", label: "Members" },
+  { path: "/testimonials", label: "Testimonials" },
   { path: "/blessings", label: "Take Blessings" },
 ];
 

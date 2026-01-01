@@ -1,6 +1,6 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Upload, Video, X, Loader2, User, FileText } from "lucide-react";
+import { Upload, Video, X, Loader2, User, FileText, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,10 +16,35 @@ const VideoUploadForm = ({ onSuccess }: { onSuccess?: () => void }) => {
   const [description, setDescription] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const [duration, setDuration] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const uploadVideo = useUploadVideo();
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Extract video duration using HTML5 video metadata
+  const extractVideoDuration = useCallback((videoFile: File): Promise<number> => {
+    return new Promise((resolve, reject) => {
+      const video = document.createElement("video");
+      video.preload = "metadata";
+      
+      video.onloadedmetadata = () => {
+        URL.revokeObjectURL(video.src);
+        if (isFinite(video.duration) && video.duration > 0) {
+          resolve(Math.round(video.duration));
+        } else {
+          reject(new Error("Could not determine video duration"));
+        }
+      };
+      
+      video.onerror = () => {
+        URL.revokeObjectURL(video.src);
+        reject(new Error("Error loading video metadata"));
+      };
+      
+      video.src = URL.createObjectURL(videoFile);
+    });
+  }, []);
+
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (!selectedFile) return;
 
@@ -35,10 +60,20 @@ const VideoUploadForm = ({ onSuccess }: { onSuccess?: () => void }) => {
 
     setFile(selectedFile);
     setPreview(URL.createObjectURL(selectedFile));
+
+    // Extract duration
+    try {
+      const videoDuration = await extractVideoDuration(selectedFile);
+      setDuration(videoDuration);
+    } catch (error) {
+      console.warn("Could not extract video duration:", error);
+      setDuration(null);
+    }
   };
 
   const clearFile = () => {
     setFile(null);
+    setDuration(null);
     if (preview) URL.revokeObjectURL(preview);
     setPreview(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
@@ -53,6 +88,7 @@ const VideoUploadForm = ({ onSuccess }: { onSuccess?: () => void }) => {
       ownerUid: uid,
       title: title || undefined,
       description: description || undefined,
+      durationSeconds: duration || undefined,
     });
 
     // Reset form
@@ -68,6 +104,12 @@ const VideoUploadForm = ({ onSuccess }: { onSuccess?: () => void }) => {
       return `${(bytes / 1024).toFixed(1)} KB`;
     }
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  };
+
+  const formatDuration = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
   return (
@@ -181,8 +223,16 @@ const VideoUploadForm = ({ onSuccess }: { onSuccess?: () => void }) => {
                 >
                   <X className="w-4 h-4" />
                 </button>
-                <div className="absolute bottom-2 left-2 px-3 py-1 rounded-full bg-background/80 text-xs text-foreground">
-                  {formatFileSize(file.size)}
+                <div className="absolute bottom-2 left-2 flex items-center gap-2">
+                  <span className="px-3 py-1 rounded-full bg-background/80 text-xs text-foreground">
+                    {formatFileSize(file.size)}
+                  </span>
+                  {duration && (
+                    <span className="px-3 py-1 rounded-full bg-background/80 text-xs text-foreground flex items-center gap-1">
+                      <Clock className="w-3 h-3" />
+                      {formatDuration(duration)}
+                    </span>
+                  )}
                 </div>
               </motion.div>
             )}
