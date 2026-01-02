@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   X,
@@ -12,10 +12,16 @@ import {
   SkipForward,
   Download,
   Trash2,
+  RotateCcw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { VideoTestimonial } from "@/hooks/useVideoTestimonials";
+import { 
+  VideoTestimonial, 
+  getPlaybackProgress, 
+  setPlaybackProgress, 
+  clearPlaybackProgress 
+} from "@/hooks/useVideoTestimonials";
 
 interface VideoLightboxProps {
   video: VideoTestimonial;
@@ -39,21 +45,70 @@ const VideoLightbox = ({
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
   const [showControls, setShowControls] = useState(true);
+  const [showResumePrompt, setShowResumePrompt] = useState(false);
+  const [savedProgress, setSavedProgress] = useState(0);
   const controlsTimeoutRef = useRef<NodeJS.Timeout>();
+  const progressSaveIntervalRef = useRef<NodeJS.Timeout>();
 
+  // Check for saved progress when opening
   useEffect(() => {
+    if (isOpen && video) {
+      const progress = getPlaybackProgress(video.id);
+      if (progress > 5) { // Only show resume if more than 5 seconds in
+        setSavedProgress(progress);
+        setShowResumePrompt(true);
+      } else {
+        setShowResumePrompt(false);
+        setSavedProgress(0);
+      }
+    }
+    
     if (!isOpen) {
       setIsPlaying(false);
-      setCurrentTime(0);
+      setShowResumePrompt(false);
+      
+      // Clear progress save interval
+      if (progressSaveIntervalRef.current) {
+        clearInterval(progressSaveIntervalRef.current);
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, video]);
+
+  // Save progress periodically while playing
+  useEffect(() => {
+    if (isPlaying && video) {
+      progressSaveIntervalRef.current = setInterval(() => {
+        if (videoRef.current) {
+          setPlaybackProgress(video.id, videoRef.current.currentTime);
+        }
+      }, 5000); // Save every 5 seconds
+    } else {
+      if (progressSaveIntervalRef.current) {
+        clearInterval(progressSaveIntervalRef.current);
+      }
+    }
+
+    return () => {
+      if (progressSaveIntervalRef.current) {
+        clearInterval(progressSaveIntervalRef.current);
+      }
+    };
+  }, [isPlaying, video]);
+
+  // Save progress when closing
+  const handleClose = useCallback(() => {
+    if (videoRef.current && video && videoRef.current.currentTime > 5) {
+      setPlaybackProgress(video.id, videoRef.current.currentTime);
+    }
+    onClose();
+  }, [video, onClose]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isOpen) return;
       switch (e.key) {
         case "Escape":
-          onClose();
+          handleClose();
           break;
         case " ":
           e.preventDefault();
@@ -76,7 +131,24 @@ const VideoLightbox = ({
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, isPlaying]);
+  }, [isOpen, isPlaying, handleClose]);
+
+  const resumePlayback = () => {
+    if (videoRef.current && savedProgress > 0) {
+      videoRef.current.currentTime = savedProgress;
+    }
+    setShowResumePrompt(false);
+    togglePlay();
+  };
+
+  const startFromBeginning = () => {
+    if (videoRef.current) {
+      videoRef.current.currentTime = 0;
+    }
+    clearPlaybackProgress(video.id);
+    setShowResumePrompt(false);
+    togglePlay();
+  };
 
   const togglePlay = () => {
     if (videoRef.current) {
@@ -126,10 +198,17 @@ const VideoLightbox = ({
     }
   };
 
+  const handleEnded = () => {
+    setIsPlaying(false);
+    // Clear progress when video ends
+    clearPlaybackProgress(video.id);
+  };
+
   const handleSeek = (value: number[]) => {
     if (videoRef.current) {
       videoRef.current.currentTime = value[0];
       setCurrentTime(value[0]);
+      setPlaybackProgress(video.id, value[0]);
     }
   };
 
@@ -173,7 +252,7 @@ const VideoLightbox = ({
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         className="fixed inset-0 z-50 flex items-center justify-center bg-black/95"
-        onClick={onClose}
+        onClick={handleClose}
       >
         <div
           ref={containerRef}
@@ -186,7 +265,7 @@ const VideoLightbox = ({
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: showControls ? 1 : 0, y: 0 }}
             className="absolute -top-12 right-0 text-white/80 hover:text-white z-10"
-            onClick={onClose}
+            onClick={handleClose}
           >
             <X className="w-8 h-8" />
           </motion.button>
@@ -201,17 +280,43 @@ const VideoLightbox = ({
             <video
               ref={videoRef}
               src={video.video_url}
+              poster={video.thumbnail_url || undefined}
               className="w-full max-h-[70vh] object-contain"
               onTimeUpdate={handleTimeUpdate}
               onLoadedMetadata={handleLoadedMetadata}
               onPlay={() => setIsPlaying(true)}
               onPause={() => setIsPlaying(false)}
-              onEnded={() => setIsPlaying(false)}
+              onEnded={handleEnded}
               onClick={togglePlay}
             />
 
+            {/* Resume prompt overlay */}
+            {showResumePrompt && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="absolute inset-0 flex items-center justify-center bg-black/70"
+              >
+                <div className="bg-card rounded-xl p-6 text-center max-w-sm mx-4">
+                  <RotateCcw className="w-10 h-10 mx-auto mb-3 text-primary" />
+                  <h4 className="text-lg font-semibold mb-2">Resume Playback?</h4>
+                  <p className="text-muted-foreground text-sm mb-4">
+                    You watched {formatTime(savedProgress)} of this video. Would you like to continue?
+                  </p>
+                  <div className="flex gap-3 justify-center">
+                    <Button variant="outline" size="sm" onClick={startFromBeginning}>
+                      Start Over
+                    </Button>
+                    <Button size="sm" onClick={resumePlayback}>
+                      Resume
+                    </Button>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
             {/* Play overlay */}
-            {!isPlaying && (
+            {!isPlaying && !showResumePrompt && (
               <motion.button
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
@@ -227,7 +332,7 @@ const VideoLightbox = ({
             {/* Controls */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: showControls ? 1 : 0, y: 0 }}
+              animate={{ opacity: showControls && !showResumePrompt ? 1 : 0, y: 0 }}
               className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-4"
             >
               {/* Progress bar */}
