@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Upload, Video, X, Loader2, User, FileText, Clock } from "lucide-react";
+import { Upload, Video, X, Loader2, User, FileText, Clock, Image } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,6 +9,7 @@ import { useUploadVideo } from "@/hooks/useVideoTestimonials";
 import { toast } from "sonner";
 
 const MAX_FILE_SIZE = 150 * 1024 * 1024; // 150MB
+const MAX_THUMB_SIZE = 5 * 1024 * 1024; // 5MB
 
 const VideoUploadForm = ({ onSuccess }: { onSuccess?: () => void }) => {
   const [uid, setUid] = useState("");
@@ -17,21 +18,58 @@ const VideoUploadForm = ({ onSuccess }: { onSuccess?: () => void }) => {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [duration, setDuration] = useState<number | null>(null);
+  const [customThumbnail, setCustomThumbnail] = useState<File | null>(null);
+  const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
+  const [generatedThumbnail, setGeneratedThumbnail] = useState<Blob | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const thumbInputRef = useRef<HTMLInputElement>(null);
   const uploadVideo = useUploadVideo();
 
-  // Extract video duration using HTML5 video metadata
-  const extractVideoDuration = useCallback((videoFile: File): Promise<number> => {
+  // Extract video duration and generate thumbnail from random frame
+  const extractVideoMetadata = useCallback((videoFile: File): Promise<{ duration: number; thumbnail: Blob }> => {
     return new Promise((resolve, reject) => {
       const video = document.createElement("video");
       video.preload = "metadata";
+      video.muted = true;
       
       video.onloadedmetadata = () => {
-        URL.revokeObjectURL(video.src);
-        if (isFinite(video.duration) && video.duration > 0) {
-          resolve(Math.round(video.duration));
-        } else {
+        if (!isFinite(video.duration) || video.duration <= 0) {
+          URL.revokeObjectURL(video.src);
           reject(new Error("Could not determine video duration"));
+          return;
+        }
+
+        const videoDuration = Math.round(video.duration);
+        
+        // Seek to a random position (between 10% and 50% of duration)
+        const randomTime = video.duration * (0.1 + Math.random() * 0.4);
+        video.currentTime = randomTime;
+      };
+
+      video.onseeked = () => {
+        // Generate thumbnail from current frame
+        const canvas = document.createElement("canvas");
+        canvas.width = video.videoWidth || 640;
+        canvas.height = video.videoHeight || 360;
+        
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          canvas.toBlob(
+            (blob) => {
+              URL.revokeObjectURL(video.src);
+              if (blob) {
+                resolve({ duration: Math.round(video.duration), thumbnail: blob });
+              } else {
+                reject(new Error("Failed to generate thumbnail"));
+              }
+            },
+            "image/jpeg",
+            0.85
+          );
+        } else {
+          URL.revokeObjectURL(video.src);
+          reject(new Error("Could not get canvas context"));
         }
       };
       
@@ -61,21 +99,66 @@ const VideoUploadForm = ({ onSuccess }: { onSuccess?: () => void }) => {
     setFile(selectedFile);
     setPreview(URL.createObjectURL(selectedFile));
 
-    // Extract duration
+    // Extract duration and generate thumbnail
     try {
-      const videoDuration = await extractVideoDuration(selectedFile);
+      const { duration: videoDuration, thumbnail } = await extractVideoMetadata(selectedFile);
       setDuration(videoDuration);
+      setGeneratedThumbnail(thumbnail);
+      
+      // Only set as preview if no custom thumbnail
+      if (!customThumbnail) {
+        setThumbnailPreview(URL.createObjectURL(thumbnail));
+      }
     } catch (error) {
-      console.warn("Could not extract video duration:", error);
+      console.warn("Could not extract video metadata:", error);
       setDuration(null);
+      setGeneratedThumbnail(null);
     }
+  };
+
+  const handleThumbnailSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
+    if (!selectedFile) return;
+
+    if (!selectedFile.type.startsWith("image/")) {
+      toast.error("Please select an image file");
+      return;
+    }
+
+    if (selectedFile.size > MAX_THUMB_SIZE) {
+      toast.error("Thumbnail must be less than 5MB");
+      return;
+    }
+
+    setCustomThumbnail(selectedFile);
+    if (thumbnailPreview) URL.revokeObjectURL(thumbnailPreview);
+    setThumbnailPreview(URL.createObjectURL(selectedFile));
+  };
+
+  const clearThumbnail = () => {
+    setCustomThumbnail(null);
+    if (thumbnailPreview) URL.revokeObjectURL(thumbnailPreview);
+    
+    // Revert to generated thumbnail if available
+    if (generatedThumbnail) {
+      setThumbnailPreview(URL.createObjectURL(generatedThumbnail));
+    } else {
+      setThumbnailPreview(null);
+    }
+    
+    if (thumbInputRef.current) thumbInputRef.current.value = "";
   };
 
   const clearFile = () => {
     setFile(null);
     setDuration(null);
+    setGeneratedThumbnail(null);
     if (preview) URL.revokeObjectURL(preview);
     setPreview(null);
+    if (!customThumbnail && thumbnailPreview) {
+      URL.revokeObjectURL(thumbnailPreview);
+      setThumbnailPreview(null);
+    }
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -83,18 +166,26 @@ const VideoUploadForm = ({ onSuccess }: { onSuccess?: () => void }) => {
     e.preventDefault();
     if (!file || uid.length !== 4) return;
 
+    // Use custom thumbnail or generated one
+    const thumbnailToUpload = customThumbnail || generatedThumbnail;
+
     await uploadVideo.mutateAsync({
       file,
       ownerUid: uid,
       title: title || undefined,
       description: description || undefined,
       durationSeconds: duration || undefined,
+      thumbnailBlob: thumbnailToUpload || undefined,
     });
 
     // Reset form
     setUid("");
     setTitle("");
     setDescription("");
+    setCustomThumbnail(null);
+    setGeneratedThumbnail(null);
+    if (thumbnailPreview) URL.revokeObjectURL(thumbnailPreview);
+    setThumbnailPreview(null);
     clearFile();
     onSuccess?.();
   };
@@ -237,6 +328,56 @@ const VideoUploadForm = ({ onSuccess }: { onSuccess?: () => void }) => {
               </motion.div>
             )}
           </AnimatePresence>
+        </div>
+
+        {/* Thumbnail upload (optional) */}
+        <div className="space-y-2">
+          <Label>Thumbnail (optional)</Label>
+          <p className="text-xs text-muted-foreground">
+            Upload a custom thumbnail or we'll generate one from your video
+          </p>
+          <input
+            ref={thumbInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleThumbnailSelect}
+            className="hidden"
+          />
+          
+          <div className="flex gap-4 items-start">
+            {thumbnailPreview && (
+              <div className="relative w-32 h-20 rounded-lg overflow-hidden bg-muted flex-shrink-0">
+                <img
+                  src={thumbnailPreview}
+                  alt="Thumbnail preview"
+                  className="w-full h-full object-cover"
+                />
+                {customThumbnail && (
+                  <button
+                    type="button"
+                    onClick={clearThumbnail}
+                    className="absolute top-1 right-1 p-1 rounded-full bg-background/80 hover:bg-background text-foreground transition-colors"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                )}
+                <span className="absolute bottom-1 left-1 px-1.5 py-0.5 rounded bg-background/80 text-[10px] text-foreground">
+                  {customThumbnail ? "Custom" : "Auto"}
+                </span>
+              </div>
+            )}
+            
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => thumbInputRef.current?.click()}
+              className="flex items-center gap-2"
+            >
+              <Image className="w-4 h-4" />
+              {customThumbnail ? "Change" : "Upload Custom"}
+            </Button>
+          </div>
         </div>
 
         {/* Submit */}

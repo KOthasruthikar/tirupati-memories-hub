@@ -176,6 +176,7 @@ export type Database = {
           file_size_bytes: number | null
           id: string
           owner_uid: string
+          thumbnail_url: string | null
           title: string | null
           uploaded_at: string
           video_url: string
@@ -186,6 +187,7 @@ export type Database = {
           file_size_bytes?: number | null
           id?: string
           owner_uid: string
+          thumbnail_url?: string | null
           title?: string | null
           uploaded_at?: string
           video_url: string
@@ -196,6 +198,7 @@ export type Database = {
           file_size_bytes?: number | null
           id?: string
           owner_uid?: string
+          thumbnail_url?: string | null
           title?: string | null
           uploaded_at?: string
           video_url?: string

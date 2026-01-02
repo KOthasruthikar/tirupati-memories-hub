@@ -6,6 +6,7 @@ export interface VideoTestimonial {
   id: string;
   owner_uid: string;
   video_url: string;
+  thumbnail_url: string | null;
   title: string | null;
   description: string | null;
   duration_seconds: number | null;
@@ -13,6 +14,46 @@ export interface VideoTestimonial {
   uploaded_at: string;
   owner_name?: string;
 }
+
+// Helper to get/set playback progress in localStorage
+const PROGRESS_KEY = "video-playback-progress";
+
+export const getPlaybackProgress = (videoId: string): number => {
+  try {
+    const stored = localStorage.getItem(PROGRESS_KEY);
+    if (stored) {
+      const progress = JSON.parse(stored);
+      return progress[videoId] || 0;
+    }
+  } catch (e) {
+    console.warn("Failed to get playback progress:", e);
+  }
+  return 0;
+};
+
+export const setPlaybackProgress = (videoId: string, time: number): void => {
+  try {
+    const stored = localStorage.getItem(PROGRESS_KEY);
+    const progress = stored ? JSON.parse(stored) : {};
+    progress[videoId] = time;
+    localStorage.setItem(PROGRESS_KEY, JSON.stringify(progress));
+  } catch (e) {
+    console.warn("Failed to save playback progress:", e);
+  }
+};
+
+export const clearPlaybackProgress = (videoId: string): void => {
+  try {
+    const stored = localStorage.getItem(PROGRESS_KEY);
+    if (stored) {
+      const progress = JSON.parse(stored);
+      delete progress[videoId];
+      localStorage.setItem(PROGRESS_KEY, JSON.stringify(progress));
+    }
+  } catch (e) {
+    console.warn("Failed to clear playback progress:", e);
+  }
+};
 
 export const useVideoTestimonials = () => {
   return useQuery({
@@ -54,12 +95,14 @@ export const useUploadVideo = () => {
       title,
       description,
       durationSeconds,
+      thumbnailBlob,
     }: {
       file: File;
       ownerUid: string;
       title?: string;
       description?: string;
       durationSeconds?: number;
+      thumbnailBlob?: Blob;
     }) => {
       // Validate member exists
       const { data: member, error: memberError } = await supabase
@@ -88,12 +131,33 @@ export const useUploadVideo = () => {
         .from("member-videos")
         .getPublicUrl(fileName);
 
+      // Upload thumbnail if provided
+      let thumbnailUrl: string | null = null;
+      if (thumbnailBlob) {
+        const thumbName = `${ownerUid}/thumb_${Date.now()}.jpg`;
+        const { error: thumbError } = await supabase.storage
+          .from("member-videos")
+          .upload(thumbName, thumbnailBlob, {
+            cacheControl: "3600",
+            upsert: false,
+            contentType: "image/jpeg",
+          });
+
+        if (!thumbError) {
+          const { data: thumbUrlData } = supabase.storage
+            .from("member-videos")
+            .getPublicUrl(thumbName);
+          thumbnailUrl = thumbUrlData.publicUrl;
+        }
+      }
+
       // Insert record
       const { data, error } = await supabase
         .from("video_testimonials")
         .insert({
           owner_uid: ownerUid,
           video_url: urlData.publicUrl,
+          thumbnail_url: thumbnailUrl,
           title: title || null,
           description: description || null,
           file_size_bytes: file.size,

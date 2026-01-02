@@ -170,12 +170,20 @@ const VideoTestimonials = () => {
                     onClick={() => setSelectedVideo(video)}
                   >
                     {/* Video thumbnail */}
-                    <div className="relative aspect-video bg-muted">
-                      <video
-                        src={video.video_url}
-                        className="w-full h-full object-cover"
-                        preload="metadata"
-                      />
+                    <div className="relative aspect-video bg-muted overflow-hidden">
+                      {video.thumbnail_url ? (
+                        <img
+                          src={video.thumbnail_url}
+                          alt={video.title || "Video thumbnail"}
+                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        />
+                      ) : (
+                        <video
+                          src={video.video_url}
+                          className="w-full h-full object-cover"
+                          preload="metadata"
+                        />
+                      )}
                       {/* Play overlay */}
                       <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                         <motion.div
