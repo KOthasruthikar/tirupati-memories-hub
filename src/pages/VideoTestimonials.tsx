@@ -1,19 +1,57 @@
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Video, Play, Clock, User, Film, Sparkles } from "lucide-react";
-import { useVideoTestimonials, VideoTestimonial } from "@/hooks/useVideoTestimonials";
+import { Video, Play, Clock, User, Film, Sparkles, Loader2 } from "lucide-react";
+import { useVideoTestimonials, VideoTestimonial, getPlaybackProgress } from "@/hooks/useVideoTestimonials";
 import VideoUploadForm from "@/components/VideoUploadForm";
 import VideoLightbox from "@/components/VideoLightbox";
 import VideoDeleteDialog from "@/components/VideoDeleteDialog";
 import LoadingState from "@/components/LoadingState";
 import ErrorState from "@/components/ErrorState";
-import LazyImage from "@/components/LazyImage";
+
+const VIDEOS_PER_PAGE = 9;
 
 const VideoTestimonials = () => {
-  const { data: videos = [], isLoading, isError, refetch } = useVideoTestimonials();
+  const [limit, setLimit] = useState(VIDEOS_PER_PAGE);
+  const { data: videos = [], isLoading, isError, refetch, isFetching } = useVideoTestimonials(limit);
   const [selectedVideo, setSelectedVideo] = useState<VideoTestimonial | null>(null);
   const [deleteVideo, setDeleteVideo] = useState<VideoTestimonial | null>(null);
   const [showUploadForm, setShowUploadForm] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+
+  // Check if there are more videos to load
+  useEffect(() => {
+    if (videos.length < limit) {
+      setHasMore(false);
+    } else {
+      setHasMore(true);
+    }
+  }, [videos.length, limit]);
+
+  // Infinite scroll observer
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !isFetching) {
+          setLimit((prev) => prev + VIDEOS_PER_PAGE);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (loadMoreRef.current) {
+      observer.observe(loadMoreRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [hasMore, isFetching]);
+
+  // Get watch progress for a video
+  const getWatchProgress = useCallback((video: VideoTestimonial) => {
+    const progress = getPlaybackProgress(video.id);
+    if (!progress || !video.duration_seconds) return 0;
+    return Math.min((progress / video.duration_seconds) * 100, 100);
+  }, []);
 
   const formatDuration = (seconds: number | null) => {
     if (!seconds) return "0:00";
@@ -155,74 +193,104 @@ const VideoTestimonials = () => {
               </button>
             </motion.div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {videos.map((video, index) => (
-                <motion.div
-                  key={video.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1 }}
-                  className="group"
-                >
-                  <div
-                    className="relative rounded-2xl overflow-hidden bg-card shadow-card border border-border cursor-pointer card-hover"
-                    onClick={() => setSelectedVideo(video)}
-                  >
-                    {/* Video thumbnail */}
-                    <div className="relative aspect-video bg-muted overflow-hidden">
-                      {video.thumbnail_url ? (
-                        <img
-                          src={video.thumbnail_url}
-                          alt={video.title || "Video thumbnail"}
-                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                        />
-                      ) : (
-                        <video
-                          src={video.video_url}
-                          className="w-full h-full object-cover"
-                          preload="metadata"
-                        />
-                      )}
-                      {/* Play overlay */}
-                      <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <motion.div
-                          whileHover={{ scale: 1.1 }}
-                          className="w-16 h-16 rounded-full bg-primary/90 flex items-center justify-center shadow-lg"
-                        >
-                          <Play className="w-7 h-7 text-primary-foreground ml-1" />
-                        </motion.div>
-                      </div>
-                      {/* Duration badge */}
-                      {video.duration_seconds && (
-                        <div className="absolute bottom-2 right-2 px-2 py-1 rounded bg-black/70 text-white text-xs flex items-center gap-1">
-                          <Clock className="w-3 h-3" />
-                          {formatDuration(video.duration_seconds)}
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {videos.map((video, index) => {
+                  const watchProgress = getWatchProgress(video);
+                  return (
+                    <motion.div
+                      key={video.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: Math.min(index * 0.05, 0.3) }}
+                      className="group"
+                    >
+                      <div
+                        className="relative rounded-2xl overflow-hidden bg-card shadow-card border border-border cursor-pointer card-hover"
+                        onClick={() => setSelectedVideo(video)}
+                      >
+                        {/* Video thumbnail */}
+                        <div className="relative aspect-video bg-muted overflow-hidden">
+                          {video.thumbnail_url ? (
+                            <img
+                              src={video.thumbnail_url}
+                              alt={video.title || "Video thumbnail"}
+                              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                              loading="lazy"
+                            />
+                          ) : (
+                            <video
+                              src={video.video_url}
+                              className="w-full h-full object-cover"
+                              preload="metadata"
+                            />
+                          )}
+                          {/* Play overlay */}
+                          <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <motion.div
+                              whileHover={{ scale: 1.1 }}
+                              className="w-16 h-16 rounded-full bg-primary/90 flex items-center justify-center shadow-lg"
+                            >
+                              <Play className="w-7 h-7 text-primary-foreground ml-1" />
+                            </motion.div>
+                          </div>
+                          {/* Duration badge */}
+                          {video.duration_seconds && (
+                            <div className="absolute bottom-2 right-2 px-2 py-1 rounded bg-black/70 text-white text-xs flex items-center gap-1">
+                              <Clock className="w-3 h-3" />
+                              {formatDuration(video.duration_seconds)}
+                            </div>
+                          )}
+                          {/* Watch progress bar */}
+                          {watchProgress > 0 && (
+                            <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/50">
+                              <div
+                                className="h-full bg-primary transition-all duration-300"
+                                style={{ width: `${watchProgress}%` }}
+                              />
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
 
-                    {/* Video info */}
-                    <div className="p-4">
-                      <h3 className="font-semibold text-foreground line-clamp-1 mb-1">
-                        {video.title || "Untitled Testimonial"}
-                      </h3>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <User className="w-3 h-3" />
-                        <span>{video.owner_name}</span>
-                        <span>•</span>
-                        <span>{formatDate(video.uploaded_at)}</span>
+                        {/* Video info */}
+                        <div className="p-4">
+                          <h3 className="font-semibold text-foreground line-clamp-1 mb-1">
+                            {video.title || "Untitled Testimonial"}
+                          </h3>
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <User className="w-3 h-3" />
+                            <span>{video.owner_name}</span>
+                            <span>•</span>
+                            <span>{formatDate(video.uploaded_at)}</span>
+                          </div>
+                          {video.file_size_bytes && (
+                            <p className="text-xs text-muted-foreground mt-2">
+                              {formatFileSize(video.file_size_bytes)}
+                            </p>
+                          )}
+                        </div>
                       </div>
-                      {video.file_size_bytes && (
-                        <p className="text-xs text-muted-foreground mt-2">
-                          {formatFileSize(video.file_size_bytes)}
-                        </p>
-                      )}
-                    </div>
+                    </motion.div>
+                  );
+                })}
+              </div>
+
+              {/* Load more trigger */}
+              <div ref={loadMoreRef} className="py-8 flex justify-center">
+                {isFetching && hasMore && (
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <span>Loading more...</span>
                   </div>
-                </motion.div>
-              ))}
-            </div>
+                )}
+                {!hasMore && videos.length > 0 && (
+                  <p className="text-muted-foreground text-sm">
+                    You've seen all testimonials
+                  </p>
+                )}
+              </div>
+            </>
           )}
         </div>
       </section>

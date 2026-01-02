@@ -55,14 +55,15 @@ export const clearPlaybackProgress = (videoId: string): void => {
   }
 };
 
-export const useVideoTestimonials = () => {
+export const useVideoTestimonials = (limit: number = 9) => {
   return useQuery({
-    queryKey: ["video-testimonials"],
+    queryKey: ["video-testimonials", limit],
     queryFn: async () => {
       const { data: videos, error } = await supabase
         .from("video_testimonials")
         .select("*")
-        .order("uploaded_at", { ascending: false });
+        .order("uploaded_at", { ascending: false })
+        .limit(limit);
 
       if (error) throw error;
 

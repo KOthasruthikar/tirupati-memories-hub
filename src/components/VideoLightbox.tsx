@@ -169,16 +169,42 @@ const VideoLightbox = ({
   };
 
   const toggleFullscreen = async () => {
-    if (!containerRef.current) return;
-
-    if (!isFullscreen) {
-      await containerRef.current.requestFullscreen();
-      setIsFullscreen(true);
-    } else {
-      await document.exitFullscreen();
-      setIsFullscreen(false);
+    try {
+      if (!isFullscreen) {
+        // Use video element for native fullscreen with controls
+        if (videoRef.current?.requestFullscreen) {
+          await videoRef.current.requestFullscreen();
+        } else if ((videoRef.current as any)?.webkitRequestFullscreen) {
+          await (videoRef.current as any).webkitRequestFullscreen();
+        } else if (containerRef.current?.requestFullscreen) {
+          await containerRef.current.requestFullscreen();
+        }
+      } else {
+        if (document.exitFullscreen) {
+          await document.exitFullscreen();
+        } else if ((document as any).webkitExitFullscreen) {
+          await (document as any).webkitExitFullscreen();
+        }
+      }
+    } catch (error) {
+      console.warn("Fullscreen error:", error);
     }
   };
+
+  // Listen for fullscreen changes
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    document.addEventListener("webkitfullscreenchange", handleFullscreenChange);
+    
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+      document.removeEventListener("webkitfullscreenchange", handleFullscreenChange);
+    };
+  }, []);
 
   const skip = (seconds: number) => {
     if (videoRef.current) {
