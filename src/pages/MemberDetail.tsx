@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, User, Quote, Lock, Send, CheckCircle, XCircle, Clock, Eye } from "lucide-react";
+import { ArrowLeft, User, Quote, Lock, Send, CheckCircle, XCircle, Clock, Eye, MessageCircle } from "lucide-react";
 import { useMember, useMemberGallery, useMemberTaggedImages } from "@/hooks/useMembers";
 import { useAuth } from "@/contexts/AuthContext";
 import { useHasAccess, useAccessRequestStatus, useRequestAccess, useResendAccessRequest } from "@/hooks/useAccessRequests";
@@ -12,6 +12,7 @@ import { toast } from "sonner";
 
 const MemberDetail = () => {
   const { uid } = useParams<{ uid: string }>();
+  const navigate = useNavigate();
   const { member: currentUser } = useAuth();
   const { data: member, isLoading, error } = useMember(uid || "");
   const { data: ownedImages } = useMemberGallery(uid || "");
@@ -34,6 +35,14 @@ const MemberDetail = () => {
 
   // Check if current user is the owner
   const isOwner = currentUser?.uid === uid;
+
+  const handleStartChat = () => {
+    if (!currentUser) {
+      toast.error("Please login to chat");
+      return;
+    }
+    navigate(`/chat?with=${uid}`);
+  };
 
   // Combine owned and tagged images, removing duplicates
   const allImages = [...(ownedImages || [])];
@@ -168,9 +177,22 @@ const MemberDetail = () => {
                   UID: {member.uid}
                 </span>
               </div>
-              <h1 className="font-heading text-3xl md:text-4xl font-bold text-foreground mb-2">
-                {member.name}
-              </h1>
+              <div className="flex items-center justify-center md:justify-start gap-3 mb-2">
+                <h1 className="font-heading text-3xl md:text-4xl font-bold text-foreground">
+                  {member.name}
+                </h1>
+                {!isOwner && (
+                  <Button
+                    onClick={handleStartChat}
+                    size="sm"
+                    variant="outline"
+                    className="gap-2"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    Chat
+                  </Button>
+                )}
+              </div>
               <p className="text-lg text-primary font-medium mb-4">{member.role}</p>
               
               {/* Memory Quote */}

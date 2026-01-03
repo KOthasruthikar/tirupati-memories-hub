@@ -56,6 +56,30 @@ export type Database = {
           },
         ]
       }
+      conversations: {
+        Row: {
+          created_at: string
+          id: string
+          participant_1_uid: string
+          participant_2_uid: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          participant_1_uid: string
+          participant_2_uid: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          participant_1_uid?: string
+          participant_2_uid?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       gallery: {
         Row: {
           caption: string | null
@@ -168,6 +192,47 @@ export type Database = {
           uid?: string
         }
         Relationships: []
+      }
+      messages: {
+        Row: {
+          content: string | null
+          conversation_id: string
+          created_at: string
+          duration_seconds: number | null
+          id: string
+          is_read: boolean
+          message_type: string
+          sender_uid: string
+        }
+        Insert: {
+          content?: string | null
+          conversation_id: string
+          created_at?: string
+          duration_seconds?: number | null
+          id?: string
+          is_read?: boolean
+          message_type?: string
+          sender_uid: string
+        }
+        Update: {
+          content?: string | null
+          conversation_id?: string
+          created_at?: string
+          duration_seconds?: number | null
+          id?: string
+          is_read?: boolean
+          message_type?: string
+          sender_uid?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       video_testimonials: {
         Row: {
