@@ -20,6 +20,7 @@ import UploadImage from "./pages/UploadImage";
 import Blessings from "./pages/Blessings";
 import AccessHistory from "./pages/AccessHistory";
 import VideoTestimonials from "./pages/VideoTestimonials";
+import Chat from "./pages/Chat";
 import NotFound from "./pages/NotFound";
 
 const App = () => (
@@ -46,6 +47,7 @@ const App = () => (
                 <Route path="/blessings" element={<Blessings />} />
                 <Route path="/access-history" element={<AccessHistory />} />
                 <Route path="/testimonials" element={<VideoTestimonials />} />
+                <Route path="/chat" element={<Chat />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </main>

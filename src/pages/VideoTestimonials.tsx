@@ -5,6 +5,7 @@ import { useVideoTestimonials, VideoTestimonial, getPlaybackProgress } from "@/h
 import VideoUploadForm from "@/components/VideoUploadForm";
 import VideoLightbox from "@/components/VideoLightbox";
 import VideoDeleteDialog from "@/components/VideoDeleteDialog";
+import VideoShareButtons from "@/components/VideoShareButtons";
 import LoadingState from "@/components/LoadingState";
 import ErrorState from "@/components/ErrorState";
 
@@ -255,14 +256,21 @@ const VideoTestimonials = () => {
 
                         {/* Video info */}
                         <div className="p-4">
-                          <h3 className="font-semibold text-foreground line-clamp-1 mb-1">
-                            {video.title || "Untitled Testimonial"}
-                          </h3>
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <User className="w-3 h-3" />
-                            <span>{video.owner_name}</span>
-                            <span>•</span>
-                            <span>{formatDate(video.uploaded_at)}</span>
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-semibold text-foreground line-clamp-1 mb-1">
+                                {video.title || "Untitled Testimonial"}
+                              </h3>
+                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                <User className="w-3 h-3" />
+                                <span>{video.owner_name}</span>
+                                <span>•</span>
+                                <span>{formatDate(video.uploaded_at)}</span>
+                              </div>
+                            </div>
+                            <div onClick={(e) => e.stopPropagation()}>
+                              <VideoShareButtons videoId={video.id} title={video.title || "Video Testimonial"} />
+                            </div>
                           </div>
                           {video.file_size_bytes && (
                             <p className="text-xs text-muted-foreground mt-2">

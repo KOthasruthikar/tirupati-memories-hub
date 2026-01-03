@@ -13,6 +13,7 @@ const Footer = () => {
     { path: "/gallery", label: "Gallery", icon: "📸" },
     { path: "/members", label: "Members", icon: "👥" },
     { path: "/testimonials", label: "Testimonials", icon: "🎬" },
+    { path: "/chat", label: "Chat", icon: "💬" },
     { path: "/blessings", label: "Blessings", icon: "🙏" },
   ];
 
