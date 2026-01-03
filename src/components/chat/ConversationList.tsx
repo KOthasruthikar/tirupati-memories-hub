@@ -1,7 +1,8 @@
 import { motion } from "framer-motion";
-import { MessageCircle } from "lucide-react";
+import { MessageCircle, Circle } from "lucide-react";
 import { Conversation } from "@/hooks/useChat";
 import { useMembers } from "@/hooks/useMembers";
+import { useOnlineMembers } from "@/hooks/useChatPresence";
 import { format } from "date-fns";
 
 interface ConversationListProps {
@@ -18,6 +19,7 @@ const ConversationList = ({
   onSelect,
 }: ConversationListProps) => {
   const { data: members } = useMembers();
+  const onlineMembers = useOnlineMembers();
 
   const getOtherMember = (conversation: Conversation) => {
     const otherUid =
@@ -25,6 +27,12 @@ const ConversationList = ({
         ? conversation.participant_2_uid
         : conversation.participant_1_uid;
     return members?.find((m) => m.uid === otherUid);
+  };
+
+  const getOtherUid = (conversation: Conversation) => {
+    return conversation.participant_1_uid === currentMemberUid
+      ? conversation.participant_2_uid
+      : conversation.participant_1_uid;
   };
 
   if (!conversations.length) {
@@ -41,7 +49,9 @@ const ConversationList = ({
     <div className="divide-y divide-border">
       {conversations.map((conversation) => {
         const otherMember = getOtherMember(conversation);
+        const otherUid = getOtherUid(conversation);
         const isSelected = selectedConversationId === conversation.id;
+        const isOnline = onlineMembers.has(otherUid);
 
         return (
           <motion.button
@@ -52,22 +62,35 @@ const ConversationList = ({
               isSelected ? "bg-muted" : ""
             }`}
           >
-            <div className="w-12 h-12 rounded-full overflow-hidden bg-muted shrink-0">
-              {otherMember?.profile_image ? (
-                <img
-                  src={otherMember.profile_image}
-                  alt={otherMember.name}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-lg font-semibold text-muted-foreground">
-                  {otherMember?.name?.charAt(0) || "?"}
-                </div>
-              )}
+            <div className="relative">
+              <div className="w-12 h-12 rounded-full overflow-hidden bg-muted shrink-0">
+                {otherMember?.profile_image ? (
+                  <img
+                    src={otherMember.profile_image}
+                    alt={otherMember.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-lg font-semibold text-muted-foreground">
+                    {otherMember?.name?.charAt(0) || "?"}
+                  </div>
+                )}
+              </div>
+              {/* Online indicator */}
+              <span
+                className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-background ${
+                  isOnline ? "bg-green-500" : "bg-muted-foreground"
+                }`}
+              />
             </div>
 
             <div className="flex-1 min-w-0">
-              <p className="font-medium truncate">{otherMember?.name || "Unknown"}</p>
+              <div className="flex items-center gap-2">
+                <p className="font-medium truncate">{otherMember?.name || "Unknown"}</p>
+                {isOnline && (
+                  <Circle className="w-2 h-2 fill-green-500 text-green-500 shrink-0" />
+                )}
+              </div>
               <p className="text-xs text-muted-foreground truncate">{otherMember?.role}</p>
             </div>
 

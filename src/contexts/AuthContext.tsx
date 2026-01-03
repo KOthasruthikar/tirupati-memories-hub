@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { DbMember } from "@/types/database";
+import { useTrackOnlineStatus } from "@/hooks/useChatPresence";
 
 interface AuthContextType {
   member: DbMember | null;
@@ -106,6 +107,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return { success: false, error: error.message };
     }
   };
+
+  // Track online status when member is logged in
+  useTrackOnlineStatus(member?.uid);
 
   return (
     <AuthContext.Provider value={{ member, isLoading, login, logout, setPassword, updateMember }}>

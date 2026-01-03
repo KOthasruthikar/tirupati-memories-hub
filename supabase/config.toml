@@ -2,3 +2,9 @@ project_id = "brheeuqpvnadjlmrogbc"
 
 [functions.send-access-notification]
 verify_jwt = false
+
+[functions.send-recovery-code]
+verify_jwt = false
+
+[functions.send-chat-backup]
+verify_jwt = false

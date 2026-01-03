@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback } from "react";
 import { Send, Video, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,10 +9,11 @@ interface ChatInputProps {
   onSendText: (text: string) => void;
   onSendVoice: (blob: Blob, duration: number) => void;
   onSendVideo: (file: File, duration: number) => void;
+  onTyping?: () => void;
   isSending?: boolean;
 }
 
-const ChatInput = ({ onSendText, onSendVoice, onSendVideo, isSending }: ChatInputProps) => {
+const ChatInput = ({ onSendText, onSendVoice, onSendVideo, onTyping, isSending }: ChatInputProps) => {
   const [text, setText] = useState("");
   const videoInputRef = useRef<HTMLInputElement>(null);
 
@@ -30,6 +31,11 @@ const ChatInput = ({ onSendText, onSendVoice, onSendVideo, isSending }: ChatInpu
       handleSendText();
     }
   };
+
+  const handleTextChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setText(e.target.value);
+    onTyping?.();
+  }, [onTyping]);
 
   const handleVideoSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -84,7 +90,7 @@ const ChatInput = ({ onSendText, onSendVoice, onSendVideo, isSending }: ChatInpu
 
         <Textarea
           value={text}
-          onChange={(e) => setText(e.target.value)}
+          onChange={handleTextChange}
           onKeyDown={handleKeyDown}
           placeholder="Type a message..."
           className="min-h-[40px] max-h-[120px] resize-none"
