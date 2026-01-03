@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { motion } from "framer-motion";
-import { ArrowLeft, Download, Loader2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowLeft, Download, Loader2, Circle, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ChatMessage from "./ChatMessage";
 import ChatInput from "./ChatInput";
@@ -12,8 +12,11 @@ import {
   useMarkMessagesRead,
   Message,
 } from "@/hooks/useChat";
+import { useChatPresence } from "@/hooks/useChatPresence";
 import { useMember } from "@/hooks/useMembers";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { formatDistanceToNow } from "date-fns";
 
 interface ChatWindowProps {
   conversationId: string;
@@ -26,11 +29,19 @@ const ChatWindow = ({ conversationId, currentMemberUid, otherMemberUid, onBack }
   const { data: messages, isLoading } = useMessages(conversationId);
   const { data: otherMember } = useMember(otherMemberUid);
   const [localMessages, setLocalMessages] = useState<Message[]>([]);
+  const [isBackingUp, setIsBackingUp] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
   const sendMessage = useSendMessage();
   const uploadMedia = useUploadChatMedia();
   const markRead = useMarkMessagesRead();
+  
+  // Presence tracking
+  const { otherUserPresence, setTyping } = useChatPresence(
+    conversationId,
+    currentMemberUid,
+    otherMemberUid
+  );
 
   // Sync local messages with fetched messages
   useEffect(() => {
@@ -69,6 +80,7 @@ const ChatWindow = ({ conversationId, currentMemberUid, otherMemberUid, onBack }
         content: text,
         messageType: "text",
       });
+      setTyping(false);
     } catch {
       toast.error("Failed to send message");
     }
@@ -105,13 +117,46 @@ const ChatWindow = ({ conversationId, currentMemberUid, otherMemberUid, onBack }
     }
   };
 
-  const handleBackupToEmail = () => {
-    if (!otherMember?.email) {
-      toast.error("No email set for backup");
-      return;
+  const handleTyping = useCallback(() => {
+    setTyping(true);
+  }, [setTyping]);
+
+  const handleBackupToEmail = async () => {
+    setIsBackingUp(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("send-chat-backup", {
+        body: {
+          conversationId,
+          requesterUid: currentMemberUid,
+        },
+      });
+
+      if (error) throw error;
+      
+      if (data?.success) {
+        toast.success(data.message || "Chat backup sent to your email!");
+      } else {
+        toast.error(data?.error || "Failed to send backup");
+      }
+    } catch (error: any) {
+      console.error("Backup error:", error);
+      toast.error(error.message || "Failed to send backup");
+    } finally {
+      setIsBackingUp(false);
     }
-    // This would trigger an edge function to email the chat history
-    toast.info("Email backup feature coming soon");
+  };
+
+  const getStatusText = () => {
+    if (otherUserPresence.isTyping) {
+      return "typing...";
+    }
+    if (otherUserPresence.isOnline) {
+      return "online";
+    }
+    if (otherUserPresence.lastSeen) {
+      return `last seen ${formatDistanceToNow(new Date(otherUserPresence.lastSeen), { addSuffix: true })}`;
+    }
+    return "offline";
   };
 
   const isSending = sendMessage.isPending || uploadMedia.isPending;
@@ -124,27 +169,62 @@ const ChatWindow = ({ conversationId, currentMemberUid, otherMemberUid, onBack }
           <ArrowLeft className="w-5 h-5" />
         </Button>
 
-        <div className="w-10 h-10 rounded-full overflow-hidden bg-muted shrink-0">
-          {otherMember?.profile_image ? (
-            <img
-              src={otherMember.profile_image}
-              alt={otherMember.name}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center font-semibold text-muted-foreground">
-              {otherMember?.name?.charAt(0) || "?"}
-            </div>
-          )}
+        <div className="relative">
+          <div className="w-10 h-10 rounded-full overflow-hidden bg-muted shrink-0">
+            {otherMember?.profile_image ? (
+              <img
+                src={otherMember.profile_image}
+                alt={otherMember.name}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center font-semibold text-muted-foreground">
+                {otherMember?.name?.charAt(0) || "?"}
+              </div>
+            )}
+          </div>
+          {/* Online indicator dot */}
+          <span
+            className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-background ${
+              otherUserPresence.isOnline ? "bg-green-500" : "bg-muted-foreground"
+            }`}
+          />
         </div>
 
         <div className="flex-1 min-w-0">
           <p className="font-medium truncate">{otherMember?.name || "Loading..."}</p>
-          <p className="text-xs text-muted-foreground truncate">{otherMember?.role}</p>
+          <p className="text-xs text-muted-foreground truncate flex items-center gap-1">
+            {otherUserPresence.isTyping ? (
+              <motion.span
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-primary"
+              >
+                typing...
+              </motion.span>
+            ) : otherUserPresence.isOnline ? (
+              <span className="text-green-500 flex items-center gap-1">
+                <Circle className="w-2 h-2 fill-current" />
+                online
+              </span>
+            ) : (
+              <span>{getStatusText()}</span>
+            )}
+          </p>
         </div>
 
-        <Button variant="ghost" size="icon" onClick={handleBackupToEmail} title="Backup to email">
-          <Download className="w-4 h-4" />
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={handleBackupToEmail}
+          disabled={isBackingUp}
+          title="Send chat backup to email"
+        >
+          {isBackingUp ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            <Mail className="w-4 h-4" />
+          )}
         </Button>
       </div>
 
@@ -172,6 +252,39 @@ const ChatWindow = ({ conversationId, currentMemberUid, otherMemberUid, onBack }
             />
           ))
         )}
+        
+        {/* Typing indicator */}
+        <AnimatePresence>
+          {otherUserPresence.isTyping && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="flex justify-start"
+            >
+              <div className="bg-muted rounded-2xl px-4 py-2 rounded-bl-sm">
+                <div className="flex gap-1">
+                  <motion.span
+                    animate={{ y: [0, -4, 0] }}
+                    transition={{ duration: 0.6, repeat: Infinity, delay: 0 }}
+                    className="w-2 h-2 bg-muted-foreground rounded-full"
+                  />
+                  <motion.span
+                    animate={{ y: [0, -4, 0] }}
+                    transition={{ duration: 0.6, repeat: Infinity, delay: 0.15 }}
+                    className="w-2 h-2 bg-muted-foreground rounded-full"
+                  />
+                  <motion.span
+                    animate={{ y: [0, -4, 0] }}
+                    transition={{ duration: 0.6, repeat: Infinity, delay: 0.3 }}
+                    className="w-2 h-2 bg-muted-foreground rounded-full"
+                  />
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+        
         <div ref={messagesEndRef} />
       </div>
 
@@ -180,6 +293,7 @@ const ChatWindow = ({ conversationId, currentMemberUid, otherMemberUid, onBack }
         onSendText={handleSendText}
         onSendVoice={handleSendVoice}
         onSendVideo={handleSendVideo}
+        onTyping={handleTyping}
         isSending={isSending}
       />
     </div>
