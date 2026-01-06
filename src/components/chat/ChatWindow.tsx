@@ -1,6 +1,6 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Download, Loader2, Circle, Mail } from "lucide-react";
+import { ArrowLeft, Loader2, Circle, Mail, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ChatMessage from "./ChatMessage";
 import ChatInput from "./ChatInput";
@@ -10,6 +10,8 @@ import {
   useSendMessage,
   useUploadChatMedia,
   useMarkMessagesRead,
+  useEditMessage,
+  useDeleteMessage,
   Message,
 } from "@/hooks/useChat";
 import { useChatPresence } from "@/hooks/useChatPresence";
@@ -17,6 +19,16 @@ import { useMember } from "@/hooks/useMembers";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface ChatWindowProps {
   conversationId: string;
@@ -30,11 +42,15 @@ const ChatWindow = ({ conversationId, currentMemberUid, otherMemberUid, onBack }
   const { data: otherMember } = useMember(otherMemberUid);
   const [localMessages, setLocalMessages] = useState<Message[]>([]);
   const [isBackingUp, setIsBackingUp] = useState(false);
+  const [replyTo, setReplyTo] = useState<Message | null>(null);
+  const [deleteMessageId, setDeleteMessageId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
   const sendMessage = useSendMessage();
   const uploadMedia = useUploadChatMedia();
   const markRead = useMarkMessagesRead();
+  const editMessage = useEditMessage();
+  const deleteMessage = useDeleteMessage();
   
   // Presence tracking
   const { otherUserPresence, setTyping } = useChatPresence(
@@ -57,15 +73,27 @@ const ChatWindow = ({ conversationId, currentMemberUid, otherMemberUid, onBack }
     }
   }, [conversationId, currentMemberUid]);
 
-  // Handle new realtime messages
-  const handleNewMessage = useCallback((message: Message) => {
-    setLocalMessages((prev) => {
-      if (prev.some((m) => m.id === message.id)) return prev;
-      return [...prev, message];
-    });
-  }, []);
+  // Handle realtime events
+  const realtimeCallbacks = useMemo(() => ({
+    onInsert: (message: Message) => {
+      setLocalMessages((prev) => {
+        if (prev.some((m) => m.id === message.id)) return prev;
+        return [...prev, message];
+      });
+    },
+    onUpdate: (message: Message) => {
+      setLocalMessages((prev) => 
+        prev.map((m) => m.id === message.id ? message : m)
+      );
+    },
+    onDelete: (oldMessage: Message) => {
+      setLocalMessages((prev) => 
+        prev.filter((m) => m.id !== oldMessage.id)
+      );
+    },
+  }), []);
 
-  useRealtimeMessages(conversationId, handleNewMessage);
+  useRealtimeMessages(conversationId, realtimeCallbacks);
 
   // Scroll to bottom on new messages
   useEffect(() => {
@@ -79,10 +107,44 @@ const ChatWindow = ({ conversationId, currentMemberUid, otherMemberUid, onBack }
         senderUid: currentMemberUid,
         content: text,
         messageType: "text",
+        replyToId: replyTo?.id,
       });
       setTyping(false);
+      setReplyTo(null);
     } catch {
       toast.error("Failed to send message");
+    }
+  };
+
+  const handleReply = (message: Message) => {
+    setReplyTo(message);
+  };
+
+  const handleEdit = async (messageId: string, newContent: string) => {
+    try {
+      await editMessage.mutateAsync({
+        messageId,
+        content: newContent,
+        conversationId,
+      });
+      toast.success("Message edited");
+    } catch {
+      toast.error("Failed to edit message");
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deleteMessageId) return;
+    try {
+      await deleteMessage.mutateAsync({
+        messageId: deleteMessageId,
+        conversationId,
+      });
+      toast.success("Message deleted");
+    } catch {
+      toast.error("Failed to delete message");
+    } finally {
+      setDeleteMessageId(null);
     }
   };
 
@@ -244,13 +306,22 @@ const ChatWindow = ({ conversationId, currentMemberUid, otherMemberUid, onBack }
             <p className="text-xs mt-1">Say hello! 👋</p>
           </motion.div>
         ) : (
-          localMessages.map((message) => (
-            <ChatMessage
-              key={message.id}
-              message={message}
-              isOwn={message.sender_uid === currentMemberUid}
-            />
-          ))
+          localMessages.map((message) => {
+            const replyToMessage = message.reply_to_id 
+              ? localMessages.find((m) => m.id === message.reply_to_id) 
+              : null;
+            return (
+              <ChatMessage
+                key={message.id}
+                message={message}
+                isOwn={message.sender_uid === currentMemberUid}
+                replyToMessage={replyToMessage}
+                onReply={handleReply}
+                onEdit={handleEdit}
+                onDelete={(id) => setDeleteMessageId(id)}
+              />
+            );
+          })
         )}
         
         {/* Typing indicator */}
@@ -288,6 +359,31 @@ const ChatWindow = ({ conversationId, currentMemberUid, otherMemberUid, onBack }
         <div ref={messagesEndRef} />
       </div>
 
+      {/* Reply preview */}
+      {replyTo && (
+        <div className="px-4 py-2 bg-muted/50 border-t border-border flex items-center gap-2">
+          <div className="flex-1 text-sm truncate">
+            <span className="text-muted-foreground">Replying to: </span>
+            <span className="font-medium">
+              {replyTo.message_type === "text" 
+                ? replyTo.content?.slice(0, 40) 
+                : replyTo.message_type === "voice" 
+                  ? "🎤 Voice message"
+                  : "🎥 Video"}
+              {replyTo.content && replyTo.content.length > 40 && "..."}
+            </span>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-6 w-6 shrink-0"
+            onClick={() => setReplyTo(null)}
+          >
+            <X className="w-4 h-4" />
+          </Button>
+        </div>
+      )}
+
       {/* Input */}
       <ChatInput
         onSendText={handleSendText}
@@ -296,6 +392,24 @@ const ChatWindow = ({ conversationId, currentMemberUid, otherMemberUid, onBack }
         onTyping={handleTyping}
         isSending={isSending}
       />
+
+      {/* Delete confirmation dialog */}
+      <AlertDialog open={!!deleteMessageId} onOpenChange={() => setDeleteMessageId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete message?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This message will be permanently deleted.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
