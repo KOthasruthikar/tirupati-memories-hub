@@ -64,7 +64,8 @@ const ChatMessage = ({
     setIsEditing(false);
   };
 
-  const canEditOrDelete = isOwn && message.message_type === "text";
+  const canEdit = isOwn && message.message_type === "text";
+  const canDelete = isOwn;
 
   return (
     <motion.div
@@ -194,20 +195,20 @@ const ChatMessage = ({
                   <Reply className="w-4 h-4 mr-2" />
                   Reply
                 </DropdownMenuItem>
-                {canEditOrDelete && (
-                  <>
-                    <DropdownMenuItem onClick={() => setIsEditing(true)}>
-                      <Pencil className="w-4 h-4 mr-2" />
-                      Edit
-                    </DropdownMenuItem>
-                    <DropdownMenuItem 
-                      onClick={() => onDelete?.(message.id)}
-                      className="text-destructive focus:text-destructive"
-                    >
-                      <Trash2 className="w-4 h-4 mr-2" />
-                      Delete
-                    </DropdownMenuItem>
-                  </>
+                {canEdit && (
+                  <DropdownMenuItem onClick={() => setIsEditing(true)}>
+                    <Pencil className="w-4 h-4 mr-2" />
+                    Edit
+                  </DropdownMenuItem>
+                )}
+                {canDelete && (
+                  <DropdownMenuItem 
+                    onClick={() => onDelete?.(message.id)}
+                    className="text-destructive focus:text-destructive"
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Delete
+                  </DropdownMenuItem>
                 )}
               </DropdownMenuContent>
             </DropdownMenu>
