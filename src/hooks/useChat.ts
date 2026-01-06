@@ -19,6 +19,7 @@ export interface Message {
   duration_seconds: number | null;
   created_at: string;
   is_read: boolean;
+  reply_to_id: string | null;
 }
 
 // Get or create conversation between two members
@@ -94,8 +95,15 @@ export const useMessages = (conversationId: string) => {
   });
 };
 
-// Subscribe to realtime messages
-export const useRealtimeMessages = (conversationId: string, onNewMessage: (message: Message) => void) => {
+// Subscribe to realtime messages (INSERT, UPDATE, DELETE)
+export const useRealtimeMessages = (
+  conversationId: string,
+  callbacks: {
+    onInsert?: (message: Message) => void;
+    onUpdate?: (message: Message) => void;
+    onDelete?: (oldMessage: Message) => void;
+  }
+) => {
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -113,7 +121,35 @@ export const useRealtimeMessages = (conversationId: string, onNewMessage: (messa
         },
         (payload) => {
           const newMessage = payload.new as Message;
-          onNewMessage(newMessage);
+          callbacks.onInsert?.(newMessage);
+          queryClient.invalidateQueries({ queryKey: ["messages", conversationId] });
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "messages",
+          filter: `conversation_id=eq.${conversationId}`,
+        },
+        (payload) => {
+          const updatedMessage = payload.new as Message;
+          callbacks.onUpdate?.(updatedMessage);
+          queryClient.invalidateQueries({ queryKey: ["messages", conversationId] });
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "DELETE",
+          schema: "public",
+          table: "messages",
+          filter: `conversation_id=eq.${conversationId}`,
+        },
+        (payload) => {
+          const deletedMessage = payload.old as Message;
+          callbacks.onDelete?.(deletedMessage);
           queryClient.invalidateQueries({ queryKey: ["messages", conversationId] });
         }
       )
@@ -122,7 +158,7 @@ export const useRealtimeMessages = (conversationId: string, onNewMessage: (messa
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [conversationId, onNewMessage, queryClient]);
+  }, [conversationId, callbacks, queryClient]);
 };
 
 // Send a message
@@ -136,12 +172,14 @@ export const useSendMessage = () => {
       content,
       messageType = "text",
       durationSeconds,
+      replyToId,
     }: {
       conversationId: string;
       senderUid: string;
       content: string;
       messageType?: "text" | "voice" | "video";
       durationSeconds?: number;
+      replyToId?: string;
     }) => {
       const { data, error } = await supabase
         .from("messages")
@@ -151,6 +189,7 @@ export const useSendMessage = () => {
           content,
           message_type: messageType,
           duration_seconds: durationSeconds || null,
+          reply_to_id: replyToId || null,
         })
         .select()
         .single();
@@ -161,6 +200,61 @@ export const useSendMessage = () => {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["messages", variables.conversationId] });
       queryClient.invalidateQueries({ queryKey: ["conversations"] });
+    },
+  });
+};
+
+// Edit a message
+export const useEditMessage = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      messageId,
+      content,
+      conversationId,
+    }: {
+      messageId: string;
+      content: string;
+      conversationId: string;
+    }) => {
+      const { data, error } = await supabase
+        .from("messages")
+        .update({ content })
+        .eq("id", messageId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data as Message;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["messages", variables.conversationId] });
+    },
+  });
+};
+
+// Delete a message
+export const useDeleteMessage = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      messageId,
+      conversationId,
+    }: {
+      messageId: string;
+      conversationId: string;
+    }) => {
+      const { error } = await supabase
+        .from("messages")
+        .delete()
+        .eq("id", messageId);
+
+      if (error) throw error;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["messages", variables.conversationId] });
     },
   });
 };
